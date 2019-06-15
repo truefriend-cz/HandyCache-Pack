@@ -1,0 +1,5 @@
+HandyCache_list_Format_1
+False#~#.*#~##~##~#1674
+False#~#\.[ds]?html?(\?|$)#~##~##~#0
+False#~#\.(bmp|gif|jpe?g|png|swf|ico)(\?|$)#~##~##~#0
+False#~#\.(php|cgi|js|css)(\?|$)#~##~##~#0

@@ -1,0 +1,13 @@
+HandyCache_list_Format_4
+False#~#^http://(.*?)(:443)/(.*)#~#http://\1/\3#~#False#~#True#~#0
+False#~#.+/(redir(ect)?|rd)(\w*\.\w{2,4})?\?.*?(http[^;&]*).*#~#\4#~#False#~#True#~#0
+False#~#.*?regnum\.ru/go(to)?/\?(\d+:)+#~##~#False#~#True#~#0
+False#~#(?<=regnum\.ru)/go/\?\d+:#~##~#False#~#True#~#0
+False#~#(?<=samsung\.ru)/_goto\.html\?uri=#~##~#False#~#True#~#0
+False#~#^[^?]*%(2[56f]|3[adf])#~#\0#~#False#~#True#~#0
+False#~#%2f#~#/#~#True#~#False#~#0
+False#~#%3a#~#:#~#True#~#False#~#0
+False#~#%3f#~#?#~#True#~#False#~#0
+False#~#%3d#~#=#~#True#~#False#~#0
+False#~#%26#~#&#~#True#~#False#~#0
+False#~#%25#~#%#~#True#~#False#~#0

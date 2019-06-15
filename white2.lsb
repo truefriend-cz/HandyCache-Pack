@@ -1,0 +1,10 @@
+HandyCache_list_Format_20
+False#~#/index\.php\?.*\bact(ion)?=(keepalive|post|quotefast)#~##~##~#False#~#False#~#True#~#True#~#False#~#False#~#False#~#False#~#0
+False#~#\.(7z|ac3|ace|avi|avz|cab|exe|gz|iso|ja[dr]|mov|mp3|mpe?g|msi|nup|ogg|rar|rpm|tar|tgz|wmv|z(ip)?)$#~##~##~#False#~#False#~#False#~#True#~#False#~#False#~#False#~#False#~#0
+False#~#cproxyorig#~##~##~#False#~#False#~#False#~#False#~#True#~#True#~#False#~#False#~#0
+False#~#hghltd\.yandex\.com/yandbtm\?#~##~##~#False#~#False#~#False#~#False#~#False#~#False#~#True#~#False#~#0
+False#~#mail\.google\.com/mail/\?(ik|view)#~##~##~#False#~#False#~#False#~#True#~#True#~#False#~#False#~#False#~#0
+False#~#microsoft\.com/#~##~##~#False#~#False#~#True#~#False#~#False#~#False#~#True#~#False#~#0
+False#~#translate\.ru/url/.*\.asp#~##~##~#False#~#False#~#False#~#False#~#False#~#False#~#True#~#False#~#0
+False#~#update(\..*)?\.drweb\.com#~##~##~#False#~#False#~#False#~#True#~#False#~#False#~#False#~#False#~#0
+False#~#yandex\.ru/yandsearch\?#~##~##~#False#~#False#~#True#~#False#~#False#~#False#~#True#~#False#~#0

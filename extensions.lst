@@ -1,0 +1,15 @@
+HandyCache_list_Format_15
+False#~#------------------- Must have activated - (section down) -------------------#~#Extensions\truefriend-cz\Selector\Main.lua
+True#~#Start#~#Extensions\truefriend-cz\Start.lua
+True#~#Exit#~#Extensions\truefriend-cz\Exit.lua
+True#~#Monitor Hide#~#Extensions\truefriend-cz\Monitor_Hide.lua
+True#~#Processor#~#Extensions\truefriend-cz\Processor.lua
+False#~#------------------- Modules - (section down) --------------------------------------#~#Extensions\truefriend-cz\Selector\Modules.lua
+True#~#Ad-Block#~#Extensions\truefriend-cz\Ad-Block.lua
+False#~#Limit by Size#~#Extensions\truefriend-cz\Limit_by_Size.lua
+False#~#Delay Loading#~#Extensions\truefriend-cz\Delay_Loading.lua
+False#~#Average Loading#~#Extensions\truefriend-cz\Average_Loading.lua
+False#~#Compress#~#Extensions\truefriend-cz\Compress.lua
+False#~#Test-001#~#Extensions\truefriend-cz\Test-001.lua
+False#~#T2#~#Extensions\truefriend-cz\T2.lua
+False#~#Test-Init#~#Extensions\truefriend-cz\Test-Init.lua

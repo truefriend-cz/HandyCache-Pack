@@ -1,0 +1,16 @@
+HandyCache_list_Format_3
+False#~#[/=?;&](get|view)?(.*_)?(avatar|images?|img|pic(s|ture|x)?|photo|screenshot)(_?id|preview)?(/?$|[?=&]|\.(php|pl))#~##~##~##~#0
+False#~#\.(3gp|asf|avi|flv|mov|mp4|mpe?g|rm|wmv)(\?|$)#~##~##~##~#0
+False#~#/get_video\?#~##~##~##~#0
+False#~#\.(ani|cur|ico)(\?|$)#~##~##~#4320:00#~#0
+False#~#\.(bmp|gif|i[mp]g|jpe?g|png|svgz?|swf|tiff?|wmf)(\?|$)#~##~##~##~#0
+False#~#\.(mp[3a]|midi?|mmf|wma)(\?|$)#~##~##~##~#0
+False#~#\.css(\?|$)#~##~##~#2160:00#~#0
+False#~#\.js(\?|$)#~##~##~#720:00#~#0
+False#~#\.txt(\?|$)#~##~##~##~#0
+False#~#forum\.ru-board\.com/mailpng\.cgi\?#~##~##~##~#0
+False#~#forum\.ru-board\.com/topic\.cgi\?#~##~##~#-168:00#~#0
+False#~#im\d+-tub\.yandex\.net/i\?id=#~##~##~##~#0
+False#~#img-fotki\.yandex\.ru/get/#~##~##~##~#0
+False#~#wiki(books|(p|m)edia)\.org/w(iki)?/.*(\.|=)(css|js)(&|$)#~##~##~#720:00#~#0
+False#~#.*#~#posting#~##~#0:05#~#0
