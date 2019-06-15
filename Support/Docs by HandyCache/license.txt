@@ -1,0 +1,71 @@
+HandyCache License agreement
+
+Before you use HandyCache software, please read this agreement. You may use this software only as described in this license.
+
+1. GENERAL
+
+This End-User License Agreement ("EULA") is a legal agreement between you and Alexander Murancev (mai62) for the HandyCache, which may include computer software and associated media, electronic documentation and printed materials ("The Software").
+By installing, copying, distributing or otherwise using The Software you agree to be bound by the terms of this EULA. If you do not agree to the terms of this EULA, you must not install, use or distribute The Software, and you must destroy all copies of The Software that you have.
+
+The Software is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties.
+The Software is licensed, not sold and always remains the property of Alexander Murancev.
+
+2. LICENSING
+
+If you have not paid the registration fee for The Software, you are hereby granted an evaluation license to use The Software as described in Sections 1, 2.1 and Sections 3 - 9 below.
+If you have paid the registration fee for The Software, you are hereby granted a license to use The Software as described in Sections 1, 2.2 and Sections 3 - 9 below.
+
+2.1. EVALUATION LICENSE
+
+You may:
+
+Subject to the terms of this EULA, use The Software for evaluation purposes without charge for a period of thirty (30) days only ("Evaluation Period"). The Evaluation Period commences when you first install or use The Software, and expires exactly thirty (30) days later.
+
+You may not:
+
+Use The Software after the Evaluation Period has expired without payment of the registration fee to Alexander Murancev.
+Use of The Software after the Evaluation Period has expired is in violation of this EULA, and international copyright laws.
+
+2.2. REGISTERED LICENSE
+
+You may:
+
+Subject to the terms of this EULA, use one copy of The Software installed on one computer. A license for The Software may not be shared or used concurrently on different computers.
+
+You may not:
+
+Disclose to third parties, or publish your registration details via electronic or other means.
+
+3. RESTRICTIONS
+
+You may not reverse engineer, decompile, or disassemble The Software, except and only to the extent that such activity is expressly permitted by applicable law notwithstanding this limitation.
+You may not rent, lease, or lend The Software except as described in Section 9 below.
+
+4. TRANSFER OF RIGHTS
+
+You may permanently transfer all of your rights under this EULA, provided you retain no copies of The Software, you transfer all of The Software (including all component parts, documentation upgrades, and this EULA), and the recipient agrees to the terms of this EULA. If The Software is an upgrade, any transfer must include all prior versions of The Software.
+
+5. TERMINATION
+
+Without prejudice to any other rights, Alexander Murancev may terminate this EULA if you fail to comply with the terms and conditions of this EULA. In such event, you must destroy all copies of The Software.
+
+6. COPYRIGHT
+
+All title, including but not limited to copyrights, in and to The Software and any copies thereof are owned by Alexander Murancev. All title and intellectual property rights in and to the content which may be accessed through use of The Software is the property of the respective content owner and may be protected by applicable copyright or other intellectual property laws and treaties. This EULA grants you no rights to use such content. All rights not expressly granted are reserved by Alexander Murancev.
+
+7. LIMITED WARRANTY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, ALEXANDER MURANCEV DISCLAIMS ALL WARRANTIES AND CONDITIONS, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT, WITH REGARD TO THE SOFTWARE, AND THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES.
+ALEXANDER MURANCEV DOES NOT WARRANT THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR FREE.
+
+8. LIMITATIONS OF REMEDIES AND LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL ALEXANDER MURANCEV BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, CONSEQUENTIAL OR OTHER DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF PROFITS, BUSINESS INTERRUPTION, LOSS OF INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE PRODUCT OR THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES, EVEN IF ALEXANDER MURANCEV HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, ALEXANDER MURANCEV ENTIRE LIABILITY UNDER ANY PROVISION OF THIS EULA SHALL BE LIMITED TO THE GREATER OF THE AMOUNT ACTUALLY PAID BY YOU FOR THE SOFTWARE PRODUCT. BECAUSE SOME STATES AND JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY, THE ABOVE LIMITATION MAY NOT APPLY TO YOU.
+
+9. DISTRIBUTION
+
+You are hereby licensed to make as many copies of the installation package for The Software as you wish; give exact copies of the original installation package for The Software to anyone; and distribute the original installation package for The Software in its unmodified form via electronic or other means. The Software must be clearly identified as an evaluation version where described.
+You are specifically prohibited from charging, or requesting donations, for any such copies, however made; and from distributing The Software including documentation with other products (commercial or otherwise) without prior written permission from Alexander Murancev.
+You are also prohibited from distributing components of The Software other than the complete original installation package.
+
+
