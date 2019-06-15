@@ -1,0 +1,230 @@
+   
+<link rel="stylesheet" type="text/css" href="./css/editor.css" />
+
+<div style="margin: 0 1em;" ng-controller="editorController">
+
+	<ng-form class="form-inline TabHeadForm">
+		<div class="navbar navbar-default navbar-fixed-top subnavbar">
+			<span class="pull-left">
+				{{'File' | translate }}:
+				<select class="form-control" ng-model="editorOptions.selectedFile" style="max-width: 13rem; display: inline;">
+					<option value="">-- {{ 'All' |translate }} --</option>
+					<option ng-repeat="file in editorOptions.files">{{file}}</option>
+				</select>
+			</span>
+			<span class="pull-left">
+				{{'Rules type' | translate }}:
+				<select class="form-control" ng-model="editorOptions.selectedType" style="max-width: 13rem; display: inline;">
+					<option value="">-- {{ 'All' | translate }} --</option>
+					<option ng-repeat="type in ::editorOptions.types" value="{{type}}">{{ ::editorOptions.fullTypes[type] | translate }}</option>
+				</select>
+			</span>
+
+			<span class="form-group has-feedback pull-left">
+				{{ 'Find by word' | translate}}:
+				<input type="text" class="form-control" placeholder="" ng-model="editorOptions.searchWord" ng-model-options="{ debounce: 800 }" style="max-width: 10rem; display: inline; padding-right: 2.5rem;">
+				<small ng-show="editorOptions.searchWord && editorOptions.searchWord!=''" style="cursor: pointer; color: blue; padding: 0; margin-right: 1rem; top:50%; width: 1rem; height: 1rem; line-height: 1rem;" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" ng-click="editorOptions.searchWord = ''"></small>
+			</span>
+
+			<span ng-init="isCollapsed = true" ng-click="isCollapsed = !isCollapsed" class="pull-left">
+				<span class="glyphicon glyphicon-plus GreenSign" style="visibility: visible;" tooltip="{{ 'Create rule' | translate }}" tooltip-placement="bottom" tooltip-popup-delay="2000"></span>
+			</span>
+			
+			<span class="btn-group pull-right" dropdown>
+				<button type="button" class="btn btn-default" ng-click="(editorOptions.selectedFile && editorOptions.selectedFile!='') ? saveData(editorOptions.selectedFile) : saveData()">{{ (editorOptions.selectedFile && editorOptions.selectedFile!='') ? 'Save current file' : 'Save all files' | translate }}</button>
+				<button type="button" class="btn btn-default" dropdown-toggle ng-if="editorOptions.selectedFile && editorOptions.selectedFile!=''">
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu" ng-if="editorOptions.selectedFile && editorOptions.selectedFile!=''">
+					<li ng-click="saveData()" translate>Save all files</li>
+				</ul>
+			</span>
+		</div>
+	</ng-form>
+	
+	<!-- Окно ввода нового правила -->
+	<div collapse="isCollapsed" id="NewRuleForm" dnd-droppable="true" ui-on-drop="addNewTag($data, newRule, true)">
+		<form class="form-horizontal" name="newRuleForm"><br>
+			<div class="form-group">
+				<label class="col-md-2 control-label">{{ 'Rule' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.Find" placeholder="" required>
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type != 'EXCEPTIONS' && newRule.Type != 'BLACK'">
+				<label class="col-md-2 control-label">{{ 'URL' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.URL" placeholder="">
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'BLACK'">
+				<label class="col-md-2 control-label">{{ 'Referrer' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.Referrer" placeholder="">
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'SCRIPT'">
+				<label class="col-md-2 control-label">{{ 'Length' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.Length" placeholder="">
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'REPLACEMENTS'">
+				<label class="col-md-2 control-label">{{ 'Replacement' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.Replace" placeholder="">
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'REPLACEMENTS'">
+				<label class="col-md-2 control-label">{{ 'Content type' | translate }}:</label>
+				<div class="col-md-10">
+					<input class="form-control" ng-model="newRule.CTypes" placeholder="">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-md-2 control-label">{{ 'Comment' | translate }}:</label>
+				<div class="col-md-10">
+					<textarea class="form-control" ng-model="newRule.Comment" placeholder=""></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-md-2 control-label">{{ 'File' | translate }}:</label>
+				<div class="col-md-10">
+					<select ng-if="editorOptions.localFiles.length>0" class="form-control" style="display: inline-block; width: auto;" ng-model="newRule.File" ng-options="file for file in editorOptions.localFiles" placeholder="" ng-required="newRule.File==''"></select>
+					<span class="glyphicon glyphicon-plus GreenSign" ng-click="createFile(newFile)" style="margin-left: 1em; visibility: visible;"></span>
+					({{ 'File name' | translate }})
+					<input class="form-control" style="display: inline-block; width: auto;" ng-model="newFile" placeholder="">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-md-2 control-label">{{ 'Rule type' | translate }}:</label>
+				<div class="col-md-10">
+					<select class="form-control" style="width: auto;" ng-model="newRule.Type">
+						<option ng-repeat="type in editorOptions.types" value="{{type}}">{{ editorOptions.fullTypes[type] | translate }}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-md-2 control-label">{{ 'Tags' | translate }}:</label>
+				<div class="col-md-10">
+					<span ng-repeat="(tag,value) in newRule.Tags" class="Tag">
+						{{tag}}
+						<small><span class="glyphicon glyphicon-remove DeleteSign" ng-if="isFileLocal(newRule.File)" style="margin: 0;" ng-click="removeNewTag(tag, rule)" tooltip="{{ 'Remove' | translate}}" tooltip-popup-delay="2000"></span></small>
+					</span>
+					<span ng-if="isFileLocal(newRule.File)">
+						<span class="glyphicon glyphicon-plus GreenSign" style="visibility: visible !important;" ng-click="addNewTag(newTag, newRule, true)" tooltip="{{ 'Add tag' | translate}}" tooltip-popup-delay="2000"></span>
+						<input class="form-control" style="display: inline-block; max-width: 20rem;" ng-model="newTag" size="8" placeholder="">
+					</span>
+				</div>
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'BLACK'">
+				<label class="col-md-4 control-label">{{ 'Only for third-party domains' | translate }}:</label>
+				<input class="col-md-1 form-control" type="checkbox" ng-model="newRule.ThirdParty">
+				<label class="col-md-3 control-label">{{ 'Exception' | translate }}:</label>
+				<input class="form-control" type="checkbox" ng-model="newRule.IsException">
+			</div>
+			<div class="form-group" ng-if="newRule.Type == 'TAG'">
+				<label class="col-md-3 control-label">{{ 'Exception' | translate }}:</label>
+				<input class="form-control" type="checkbox" ng-model="newRule.IsException">
+			</div>
+			<div class="form-group" style="margin-top: 8px;">
+				<span class="glyphicon glyphicon-ok GreenSign" style="visibility: visible;" ng-if="newRuleForm.$valid" ng-click="$parent.isCollapsed = true; addNewRule(newRule)"></span>
+				<span class="glyphicon glyphicon-remove DeleteSign" style="visibility: visible;" ng-click="isCollapsed = true; newRule = initNewRule(newRule.File, newRule.Type)"></span>
+			</div>
+		</form>
+	</div>
+		
+	<!-- Метки -->
+	<div id="TagsPanel">
+		{{ 'Tags' | translate }}
+		<label style="float: right;"><input type="checkbox" ng-model="showAllTags">{{ 'Show all' | translate }}</label>
+		<div ng-repeat="(tag,on) in editorOptions.tags | orderByKey" ng-click="switchTag(tag)" ui-draggable="true" drag="tag">
+			<div ng-if="showAllTags || isTagPresent(tag)" class="Tag SelectableTag" ng-class="{SelectedTag: editorOptions.tags[tag]}">
+				<small class="glyphicon glyphicon-remove DeleteSign pull-right" ng-click="removeTagGlobally(tag)" tooltip="{{ 'Remove' | translate }}" tooltip-placement="left" tooltip-popup-delay="2000"></small>
+				{{::tag}}
+			</div>
+		</div>
+	</div>
+	<div style="width: 73vw;" dnd-droppable="true">
+		<div ng-repeat="(ruleType,rule) in filteredRules | groupBy: 'Type'">
+			<div style="background-color: #E6E0F0; margin-top: 1em;">
+				{{ editorOptions.fullTypes[ruleType] | translate }}
+			</div>
+			<div ng-repeat="filt in rule" ng-init="filterIsCollapsed = true" class="SourceInfoHeader" ui-on-drop="addNewTag($data, filt)">
+				<input class="ShowOnHover pull-left" type="checkbox" ng-checked="::!filt.Off" cm-on-change>
+				<span ng-click="filterIsCollapsed = !filterIsCollapsed" once-class="{RuleOff: filt.Off, RuleIsException: !filt.Off && filt.IsException}" style="margin-left: 1rem;">
+					<span style="display:inline-block; width:90%; word-break:break-all;">
+						{{filt.Find}}
+						<small once-if="!!filt.ThirdParty" class="badge" style="margin: 0 1rem 0 3rem;">{{ 'Only for third-party domains' | translate }}</small>
+					</span>
+					{{::getSummHits(editorOptions.hits, filt)}}
+				</span>
+				<span class="glyphicon glyphicon-remove DeleteSign pull-right" ng-click="removeRule(filt)" once-if="isFileLocal(filt.File)"></span>
+				<div ng-if="!filterIsCollapsed" class="slide" style="padding: 0 1em 0 3em; background-color: #EEEEEE;">
+					<form class="form-horizontal" name="AddNewRuleForm"><br>
+						<div class="form-group">
+							<label class="col-md-2 control-label">{{ 'Rule' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.Find" placeholder="" ng-disabled="!isFileLocal(filt.File)" required>
+							</div>
+						</div>
+						<div class="form-group" once-if="filt.Type != 'EXCEPTIONS' && filt.Type != 'BLACK'">
+							<label class="col-md-2 control-label">{{ 'URL' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.URL" placeholder="" ng-disabled="!isFileLocal(filt.File)">
+							</div>
+						</div>
+						<div class="form-group" once-if="filt.Type == 'BLACK'">
+							<label class="col-md-2 control-label">{{ 'Referrer' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.Referrer" placeholder="" ng-disabled="!isFileLocal(filt.File)">
+							</div>
+						</div>
+						<div class="form-group" once-if="filt.Type == 'SCRIPT'">
+							<label class="col-md-2 control-label">{{ 'Length' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.Length" placeholder="" ng-disabled="!isFileLocal(filt.File)">
+							</div>
+						</div>
+						<div class="form-group" once-if="filt.Type == 'REPLACEMENTS'">
+							<label class="col-md-2 control-label">{{ 'Replacement' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.Replace" placeholder="" ng-disabled="!isFileLocal(filt.File)">
+							</div>
+						</div>
+						<div class="form-group" once-if="filt.Type == 'REPLACEMENTS'">
+							<label class="col-md-2 control-label">{{ 'Content type' | translate }}:</label>
+							<div class="col-md-10">
+								<input class="form-control" ng-model="filt.CTypes" placeholder="" ng-disabled="!isFileLocal(filt.File)">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-2 control-label">{{ 'Comment' | translate }}:</label>
+							<div class="col-md-10">
+								<textarea class="form-control" ng-model="filt.Comment" ng-disabled="!isFileLocal(filt.File)" placeholder=""></textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-2 control-label">{{ 'Tags' | translate }}:</label>
+							<div class="col-md-10">
+								<span ng-repeat="(tag,value) in filt.Tags" class="Tag">
+									{{tag}}
+									<small><span class="glyphicon glyphicon-remove DeleteSign" once-if="isFileLocal(filt.File)" style="margin: 0;" ng-click="removeTagLocally(tag, filt)" tooltip="{{ 'Remove' | translate}}" tooltip-popup-delay="2000"></span></small>
+								</span>
+								<span ng-if="isFileLocal(filt.File)">
+									<span class="glyphicon glyphicon-plus GreenSign" style="visibility: visible !important;" ng-click="addNewTag(newTag, filt)" tooltip="{{ 'Add tag' | translate}}" tooltip-popup-delay="2000"></span>
+									<input class="form-control" style="display: inline-block; max-width: 20rem;" ng-model="newTag" placeholder="">
+								</span>
+							</div>
+						</div>
+						<div class="form-group" ng-if="editorOptions.selectedFile==''">
+							<label class="col-md-2 control-label">{{ 'File' | translate }}:</label>
+							 <p class="form-control-static">{{filt.File}}</p>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

@@ -1,0 +1,55 @@
+   
+<link rel="stylesheet" type="text/css" href="./css/log.css" />
+
+<div ng-controller="logController" style="margin: 0 1em;">
+
+	<form class="form-inline TabHeadForm navbar navbar-default navbar-fixed-top subnavbar">
+		<span class="pull-left">{{'User' | translate }}:
+			<select class="form-control" ng-model="logOptions.selectedLogUser" style="display: inline; width: auto; vertical-align: middle; margin-right: 1em;">
+				<option value="">-- {{ 'All' |translate }} --</option>
+				<option ng-repeat="user in options.users | orderBy:'Name'">{{user.Name}}</option>
+			</select>
+			{{'Filter by URL' | translate }}:
+			<input class="form-control" size="10" ng-model="logOptions.selectedLogURL" placeholder="" style="display: inline; width: auto; vertical-align: middle; margin-right: 1em;">
+			<span class="glyphicon glyphicon-ok" ng-if="options.fromUsersALL.Log.On" tooltip="{{ 'Turn log off' | translate }}" ng-click="logOn()" tooltip-placement="bottom" tooltip-popup-delay="2000"></span>
+			<span style="color: #FF7070;" class="glyphicon glyphicon-ban-circle" ng-if="!options.fromUsersALL.Log.On" tooltip="{{ 'Turn log on' | translate }}" ng-click="logOn()" tooltip-placement="bottom" tooltip-popup-delay="2000"></span>
+			<span class="glyphicon glyphicon-refresh" tooltip="{{ 'Refresh log' | translate }}" ng-click="getData()" tooltip-placement="bottom" tooltip-popup-delay="2000"></span>
+			<span class="glyphicon glyphicon-trash" tooltip="{{ 'Clear log' | translate }}" ng-click="emptyLog()" tooltip-placement="bottom" tooltip-popup-delay="2000"></span>
+		</span>
+	</form>
+
+	<div class="Record" ng-repeat="record in log | filter:{UserName:logOptions.selectedLogUser}:compareUser | filter:{URL:logOptions.selectedLogURL}" once-class="{NoActionPageHeader:record.InsteadText}" ng-init="logRecordCollapsed = true" once-style="{'background-color':getBackgroundColor(record)}">
+
+		<div class="RecordHeader" ng-click="logRecordCollapsed = !logRecordCollapsed"">
+			{{::record.Date}}
+			<span ng-if="logOptions.selectedLogUser==''" style="margin-left: 1em;" once-text="record.UserName"></span>
+			<span once-text="record.InsteadText ? ((record.InsteadText | translate)+':') : ''"></span>
+			<span once-if="!record.InsteadText" class="badge" style="background-color: #BBBBBB; margin-left: 1em;" once-text="record.Hits"></span>
+			<span style="margin-left: 1em;" once-text="record.URL"></span>
+		</div>
+
+		<div ng-if="!record.InsteadText && !logRecordCollapsed" class="RecordBody SlideLogRecord">
+			<div ng-repeat="hit in record.LogData" class="ExpandedBlock" once-class="{exception:hit.IsException}">
+				<div class="rule">
+					<span>
+						<span class="badge" style="margin-right: 1rem;">{{ ::(hit.IsException ? 'Exception' : '') | translate }}</span>
+						<span once-text="hit.Parser ? (hit.Parser+': ') : ''"></span><span once-text="hit.Filter | translate"></span>
+						<span class="FiredRule" once-if="!!hit.Parser" ng-click="editRule(hit)" ng-style="hit.Parser=='ContentMaster' ? {cursor: 'pointer'} : {}">
+							<span once-text="('File' | translate)+' '+getSourceByURL(users[0].Parsers[hit.Parser].Files[hit.FileNumber-1].URL).Name+(hit.Parser!='ContentMaster' ? ', '+('Line' | translate)+' '+hit.StrNumber : '')+': '"></span>
+							<span once-text="hit.RuleText"></span>
+						</span>
+					</span>
+					<span once-if="!!hit.Fragment">
+						<p class="fragment" once-text="((hit.IsException || hit.Replacement) ? 'Fragment' : 'Fragment removed' | translate)+':'"</p>
+						<pre once-text="hit.Fragment"></pre>
+					</span>
+					<span once-if="!!hit.Replacement">
+						<p class="replacement" once-text="('Replaced by' | translate)+':'"></p>
+						<pre once-text="hit.Replacement"></pre>
+					</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

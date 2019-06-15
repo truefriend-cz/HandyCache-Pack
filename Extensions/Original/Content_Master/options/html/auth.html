@@ -1,0 +1,11 @@
+<div ng-controller="authController">
+
+	<form name="AuthForm" ng-submit="submit()" class="form-horizontal" style="padding: 35vh 35vw; padding-right: 20px;">
+		<span ng-style="{visibility: isAuthenticated ? 'hidden' : 'visible'}">
+			{{ 'Password' | translate }}:
+			<input type="password" name="pass" class="form-control input-sm" size="10" style="display: inline; width: auto; vertical-align: middle;">
+		</span>
+		<button type="submit" class="btn btn-default btn-sm">{{ 'Login' | translate }}</button>
+	</form>
+
+</div>

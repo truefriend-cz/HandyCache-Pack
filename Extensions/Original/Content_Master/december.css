@@ -1,0 +1,83 @@
+BODY {
+	top: 56px !important;
+	position: relative;
+}
+
+#CM_menu_holder {
+	position: fixed;
+	display: block;
+	margin: 0;
+	left: 50%;
+	margin-left: -49%;
+	width: 98%;
+	opacity: 0.96;
+	line-height: normal;
+
+	border: #7070b0 ridge 3px;
+	border-top-style: none;
+	border-radius: 0 0 10px 10px;	/* IE 9.0+, FF 4.0+, Chrome 5.0+, Safari 5.0+, Opera 10.5+ */
+	-moz-border-radius: 0 0 10px 10px;	/* FF<4.6 */
+	-webkit-border-radius: 0 0 10px 10px;	/* Chrome<5.0, Safari<5.0 */
+
+	z-index: 100000;
+
+	-moz-user-select: none;	/* FF */
+	-khtml-user-select: none;	/* Safari < 3.0 */
+	-webkit-user-select: none;	/* Safari 3.0+, Chrome, Konqueror */
+	-ms-user-select: none;	/* IE 10.0+ */
+	user-select: none;
+}
+#CM_menu_holder::selection {	/* Opera */
+	color: inherit;
+}
+#CM_nav {
+	float: left;
+	border-radius: 0 0 10px 10px;	/* IE 9.0+, FF 4.0+, Chrome 5.0+, Safari 5.0+, Opera 10.5+ */
+	-moz-border-radius: 0 0 10px 10px;	/* FF<4.6 */
+	-webkit-border-radius: 0 0 10px 10px;	/* Chrome<5.0, Safari<5.0 */
+	border-spacing: 40px 0;
+	border-collapse: separate;
+	height: auto;
+	margin: 0px;
+	padding: 0px;
+	background-color: inherit;
+	width: 100%;
+	white-space: nowrap;
+}
+#CM_nav tr{
+	margin: 0px;
+	padding: 0px;
+}
+
+.CM_nav_item{
+	font-family: 'Times New Roman';
+	font-size: 20px;
+	font-style: normal;
+	line-height: normal;
+	border: 0px none;
+	color: inherit;
+	cursor: default;
+	margin: 0px;
+	padding: 5px 10px;
+	text-align: center;
+	vertical-align: middle;
+	width: auto;
+}
+
+.CM_nav_item span{
+	font-size: 14px;
+	display: block;
+	line-height: normal;
+}
+
+#CM_mode_text{
+	text-align:right;
+	padding-right:10px;
+	width:100%
+}
+
+.CM_nav_button:hover{
+/*	padding: 4px 9px; */
+	cursor: pointer;
+/*	border: #b0b0b0 solid 1px; */
+}

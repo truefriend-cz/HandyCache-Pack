@@ -1,0 +1,259 @@
+
+html {
+	font-family: Helvetica, Arial, Times, serif;
+	font-size: 1vw;
+}
+
+body {
+	font-size: 1.1rem;
+	margin-top: 5rem;
+}
+
+#Footer {
+	margin-top: 2rem;
+	padding: 2rem;
+	color: #999999;
+	background-color: #EEEEEE;
+	text-align: center;
+}
+
+.DeleteSign {
+	color: red;
+	margin-left: 4px;
+	visibility: hidden;
+	z-index: 0;
+}
+
+*:hover > .DeleteSign{
+	visibility: visible !important;
+}
+
+.DeleteSign:hover {
+	cursor: pointer;
+	font-weight: bold;
+    background-color: rgba(256, 140, 140, 0.27);
+    box-shadow: 0 0 10px 0 rgba(256, 140, 140, 0.8);
+}
+
+.DeleteSign:active {
+    background-color: rgba(256, 0, 0, 0.27);
+    box-shadow: 0 0 10px 0 rgba(256, 0, 0, 0.8);
+}
+
+.GreenSign {
+	color: green;
+	margin-left: 4px;
+	visibility: hidden;
+	z-index: 0;
+}
+
+*:hover > .GreenSign{
+	visibility: visible !important;
+}
+
+.GreenSign:hover {
+	cursor: pointer;
+	font-weight: bold;
+    background-color: rgba(140, 255, 140, 0.27);
+    box-shadow: 0 0 10px 0 rgba(140, 255, 140, 0.8);
+}
+
+.GreenSign:active {
+    background-color: rgba(0, 255, 0, 0.27);
+    box-shadow: 0 0 10px 0 rgba(0, 255, 0, 0.8);
+}
+
+button, input:not([type="checkbox"]), select, textarea {
+	height: auto !important;
+	font-size: inherit !important;
+}
+
+input[type="checkbox"] {
+	margin: 1px .7rem 0 0 !important;
+	height: 1rem;
+	width: 1rem;
+}
+
+input.ng-invalid, input.ng-invalid:focus, select.ng-invalid, select.ng-invalid:focus {
+    background-color: #FFE9E9;
+	border-color: rgba(229, 103, 23, 0.8);
+    box-shadow: 0 1px 1px rgba(229, 103, 23, 0.075) inset, 0 0 8px rgba(229, 103, 23, 0.6);
+    outline: 0 none;
+}
+
+.btn {
+	padding: .2rem 1rem;
+}
+
+.form-horizontal .control-label, .form-control-static {
+	padding-top: .23rem;
+}
+
+.form-control {
+	padding: .2rem 1rem;
+}
+
+.caret {
+	border-top: 0.5rem solid;
+	border-right: 0.5rem solid transparent;
+	border-left: 0.5rem solid transparent;
+}
+
+.btn-group>.btn+.dropdown-toggle {
+	padding-right: 1rem;
+	padding-left: 1rem;
+}
+
+.dropdown-menu {
+	font-size: inherit !important;
+	margin: 0;
+}
+
+.dropdown-menu li {
+	padding: 3px 20px;
+	white-space: nowrap;
+}
+
+.dropdown-menu li.divider {
+	padding: 0;
+	background-color: #EEEEEE;
+}
+
+.dropdown-menu li:hover {
+	cursor: pointer;
+	background-color: #EEEEEE;
+}
+
+.dropdown-menu li.divider:hover {
+	cursor: default;
+	background-color: none;
+}
+
+.nav-tabs li {
+	cursor: pointer;
+}
+.nav>li>a {
+	padding: 10px 1vw;
+}
+
+.tab-content { /* Стиль содержимого вкладок */
+	margin: 10px 15px 10px 15px;
+	padding-left: 1px;	/* Чтоб захватить outline */
+}
+
+.tooltip-inner {	/* Содержимое Tooltip'ов */
+    max-width: 500px;
+}
+
+.badge {
+	font-size: inherit;	/* Bootstrap не масштабирует шрифты */
+}
+
+.form-horizontal .form-group {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.form-control {
+	height: auto;
+}
+
+.SourceInfoHeader {
+	padding: 1px .5rem;
+}
+
+.SourceInfoHeader:hover {
+	background-color: #EEEEEE;
+	cursor: pointer;
+	outline: 1px solid #BBBBBB;
+    box-shadow: 3px 3px 3px 0 #DDDDDD;
+}
+
+.navbar-fixed-top {
+	background-color: #F0F5FF;
+	box-shadow: 1px 1px 3px;
+}
+
+.navbar {
+	min-height: 0;
+	margin: 0;
+	font-size: 1rem;
+}
+
+.navbar > * {
+	vertical-align: middle;
+	padding: 0.5rem;
+}
+
+.subnavbar {
+	margin-left: 8rem;
+	background-color: transparent;
+	border: none;
+	box-shadow: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1030;
+}
+
+
+.slide {
+	overflow: hidden;
+}
+.slide.ng-enter, .slide.ng-leave {
+	transition: max-height 0.3s linear;
+}
+.slide.ng-enter { max-height: 0; }        /* starting animations for enter */
+.slide.ng-enter.ng-enter-active { max-height: 300px; } /* terminal animations for enter */
+.slide.ng-leave { max-height: 300px; }        /* starting animations for leave */
+.slide.ng-leave.ng-leave-active { max-height: 0; } /* terminal animations for leave */
+
+.ShowOnHover {
+	visibility: hidden;
+}
+*:hover > .ShowOnHover {
+	visibility: visible;
+}
+
+.Disabled {
+	color: #DDDDDD;
+}
+
+.FiltersPage {
+	overflow: hidden;
+	margin-left: 2em;
+}
+
+.PageBlock {
+	padding: 0 3rem 0 1rem;
+	float: left;
+}
+
+.TableHead {
+	text-align: center;
+	background-color: #DAF7D7;
+	padding: 0 0.4em;
+	margin-bottom: 0.5em;
+}
+
+label {
+	font-weight: normal;
+}
+
+.TabHeadForm .glyphicon {
+	padding: 2px 0.3em;
+}
+.TabHeadForm .glyphicon:hover {
+	cursor: pointer;
+/*    background-color: rgba(100, 240, 255, 0.27);
+    box-shadow: 0 0 10px 0 rgba(100, 240, 255, 0.8);*/
+	text-decoration: none;
+	padding-top: 0;
+	padding-bottom: 4px;
+	vertical-align: 2px;
+}
+.TabHeadForm .glyphicon:active {
+    background-color: rgba(0, 200, 255, 0.27);
+    box-shadow: 0 0 10px 0 rgba(0, 200, 255, 0.8);
+}

@@ -1,0 +1,139 @@
+h1 {
+	text-align: center;
+	font-size: 11pt;
+}
+
+.rule > span {
+	color: #b00000;
+	line-height: 2.1;
+}
+
+.exception  {
+	background-color: #e0e0ff !important;
+}
+p.fragment, p.replacement, p.error {
+	font-variant: small-caps;
+	color: #0000ff;
+	line-height: 60%;
+	margin-top: 10px;
+}
+
+.ExpandedBlock {
+	background-color: #f1f1f1;
+	border: solid 1px #BBBBBB;
+	border-radius: 8px;
+	box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1) inset;
+	padding: 3px;
+	margin: 10px 10px 0 10px;
+}
+.rule {
+	margin: 10px 5px 10px 5px;
+}
+.FiredRule {
+	color: #002020;
+	border: 1px solid #A0C0C0;
+	border-radius: 5px;
+	background-color: #d8d8d8;
+	margin-left: 30px;
+	padding: 2px 10px;
+}
+
+.FiredRule > span + span {
+	background-color: #f2f2f2;
+	border-radius: 3px;
+	padding: 0 1em;
+}
+
+.Tooltip {
+	outline:none;
+	margin: 3px;
+	padding: 0 6px;
+	position: static;
+}
+.Tooltip:hover { text-decoration:none; } 
+.Tooltip span {
+	position: absolute;
+	z-index: 10;
+	display: none;
+	padding: 14px 14px;
+	margin-top: -30px;
+	margin-left: 28px;
+	line-height: 16px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	box-shadow: 5px 5px 8px #CCC;
+	-moz-box-shadow: 5px 5px 8px #CCC;
+	-webkit-box-shadow: 5px 5px 8px #CCC;
+}
+.Tooltip:hover span{
+	display:block; color:#111;
+	border:1px solid #DCA; background:#fffAF0; }
+
+.ErrorBlock {
+	background-color: #ffe0e0;
+	border-top: solid #e0e0e0;
+	border-bottom: solid #e0e0e0;
+}
+.NoActionPageHeader {
+	background-color: #f0f0ff;
+}
+
+.panel-heading {
+	padding: 4px;
+	background-color: inherit !important;	/* делается серым Bootstrap'ом */
+}
+.panel-heading:hover {
+	background-color: #CCCCCC !important;
+}
+.panel-heading:focus {
+	background-color: #CCCCCC !important;
+}
+
+.panel-title {
+	font-size: inherit;
+	cursor: pointer;
+}
+
+.panel-title > a{
+	text-decoration: none;
+}
+
+.rule pre {
+	font-size: inherit;	/* все <pre> портятся (уменьшается) Bootstrap'ом */
+}
+
+.Record {
+	margin: 0.4em 0;
+	word-break: break-all;
+	background-color: #f0fff0;
+	border: 1px solid #DDDDDD;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+
+.RecordHeader {
+	width: 100%;
+	cursor: pointer;
+	padding: 0.3em 0;
+	border-bottom: 1px solid #DDDDDD;
+}
+.RecordHeader:hover {
+	background-color: #D0D0D0;
+}
+
+.RecordBody {
+	margin-bottom: 1em;
+}
+
+.SlideLogRecord {
+	overflow: hidden;
+}
+.SlideLogRecord.ng-enter, .SlideLogRecord.ng-leave {
+	transition: max-height 0.3s linear;
+}
+.SlideLogRecord.ng-enter { max-height: 0; }        /* starting animations for enter */
+.SlideLogRecord.ng-enter.ng-enter-active { max-height: 50vh; } /* terminal animations for enter */
+.SlideLogRecord.ng-leave { max-height: 50vh; }        /* starting animations for leave */
+.SlideLogRecord.ng-leave.ng-leave-active { max-height: 0; } /* terminal animations for leave */
+

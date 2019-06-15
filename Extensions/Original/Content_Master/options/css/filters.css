@@ -1,0 +1,37 @@
+
+#UsersTableHead {
+	margin-bottom: 0.5em;
+}
+
+.User {
+	padding: 0 0.4em;
+}
+
+.Parser {
+	margin-bottom: 0.5em;
+	padding: 0 0.4em;
+}
+
+.Filter {
+	margin-left: 2rem;
+}
+
+.SelectedUser, .SelectedParser {
+	background-color: #F0F0F0;
+	outline: 1px solid #DDDDDD;
+}
+
+.Hits {
+	float: right;
+	margin-left: 3em;
+}
+
+.SourceInfo {
+	border: 1px solid #DDDDDD;
+	padding: 5px 5px 10px 25px;
+	margin: 5px 0;
+}
+
+.SourceInfo  input{
+	width: 100% !important;
+}

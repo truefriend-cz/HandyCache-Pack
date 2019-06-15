@@ -1,0 +1,66 @@
+﻿<!doctype html>
+<html ng-app="CMOptionsApp">
+<head>
+	<meta charset="utf-8">
+ 	<title translate>Content Master settings</title>
+   
+	<link href="./lib/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="./css/main.css" />
+
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">	
+	
+	<script src="./lib/angular.min.js"></script>
+	<script src="./lib/angular-animate.min.js"></script>
+	<script src="./lib/angular-translate.min.js"></script>
+	<script src="./lib/angular-translate-loader-static-files.js"></script>
+	<script src="./lib/ui-bootstrap-tpls.min.js"></script>
+	<script src="./lib/once.js"></script>
+	<script src="./lib/draganddrop.js"></script>
+	<script src="./lib/angular-filter.min.js"></script>
+
+	<script src="./js/main.js"></script>
+	<script src="./js/controllers/auth_controller.js"></script>
+	<script src="./js/controllers/filters_controller.js"></script>
+	<script src="./js/controllers/options_controller.js"></script>
+	<script src="./js/controllers/log_controller.js"></script>
+	<script src="./js/controllers/editor_controller.js"></script>
+	<script src="./js/filters/rules-by-tags.js"></script>
+	<script src="./js/filters/order-by-key.js"></script>
+	<script src="./js/directives/cm-on-change.js"></script>
+</head>
+<body ng-controller="MainController">
+
+	<div class="navbar navbar-default navbar-fixed-top">
+		<span class="btn-group" dropdown ng-if="isAuthenticated" is-open="isMainMenuOpen" style="z-index: 1040;" ng-mouseenter="isMainMenuOpen=true" ng-mouseleave="isMainMenuOpen=false">
+			<button type="button" class="btn btn-default" dropdown-toggle>
+				<span translate>Menu</span>
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li ng-click="gotoPage('filters')" translate>Filters</li>
+				<li ng-click="gotoPage('options')" translate>Options</li>
+				<li ng-click="gotoPage('editor')" translate>Editor</li>
+				<li ng-click="gotoPage('log')" translate>Log</li>
+				<li class="divider"></li>
+				<li ng-click="logout()" translate>Logout</li>
+			</ul>
+		</span>
+	</div>
+	
+	<div>
+		<ng-include src="pages.auth.url" ng-if="pages.auth.on"></ng-include>
+		<ng-include src="pages.filters.url" ng-if="pages.filters.on"></ng-include>
+		<ng-include src="pages.options.url" ng-if="pages.options.on"></ng-include>
+		<ng-include src="pages.log.url" ng-if="pages.log.on"></ng-include>
+		<ng-include src="pages.editor.url" ng-if="pages.editor.on"></ng-include>
+	</div>
+
+
+	<div id="Footer">
+		<span translate>This page is automatically created by Content Master extension v.</span> {{options.Version}}
+		<span style="float:right;"><a href="http://handycache.ru/cm/cm2/doc/ContentMaster.html" target="_blank" translate>Help</a> | <a href="mailto:nadenj@mail.ru" translate>E-mail to author</a></span>
+	</div>
+
+</body>
+</html>

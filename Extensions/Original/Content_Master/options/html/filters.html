@@ -1,0 +1,97 @@
+﻿   
+<link rel="stylesheet" type="text/css" href="./css/filters.css" />
+
+<div ng-controller="filtersController">
+
+	<form name="FilterUpForm" class="form-inline navbar navbar-default navbar-fixed-top subnavbar">
+		<div class="pull-left">
+			{{ 'Counters update period, sec' | translate}}:
+			<input type="text" name="autoupdate" class="form-control" style="max-width: 5rem; display: inline;" placeholder="" ng-pattern="/^\d+$/" ng-model="options.fromUsersALL.CountersAutoUpdatePeriod">
+		</div>
+
+		<!--  Кнопки -->
+		<div class="btn-group pull-right">
+			<button type="button" class="btn btn-default" ng-click="saveOptions()" translate>Save</button>
+		</div>
+		<span class="btn-group pull-right" dropdown>
+			<button type="button" class="btn btn-default" ng-click="update()">{{ 'Update CM and filters' | translate }}</button>
+			<button type="button" class="btn btn-default" dropdown-toggle>
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li ng-click="update('CM')" translate>Update CM</li>
+				<li ng-click="update('Sources')" translate>Update filters</li>
+			</ul>
+		</span>
+	</form>
+
+	<!-- Фильтры -->
+	<div class="FiltersPage">
+
+		<ng-form name="myForm" class="form-horizontal" novalidate>
+			<!-- Cписок пользователей -->
+			<div class="PageBlock">
+				<div class="TableHead" id="UsersTableHead" translate>Users</div>
+				<div ng-repeat="user in users | orderBy: 'Name'" class="User" ng-class="{SelectedUser:user===selectedUser}" ng-click="selectUser(user)" ng-init="selectUser($first ? user : null)">
+					<input type="checkbox" ng-model="user.On">{{::user.Name}}
+				</div>
+			</div>
+
+			<!-- Список фильтров -->
+			<div class="PageBlock">
+				<div class="TableHead" id="FiltersTableHead">
+					<span class="Hits" style="margin-left: 0;" translate>Hits</span>
+					<span style="padding-right: 3em;">{{ 'Filters' | translate }}</span>
+				</div>
+				<div ng-repeat="(parserName, parser) in selectedUser.Parsers | orderByKey" class="Parser" ng-class="{SelectedParser:parser===selectedParser}" ng-click="selectParser(parser)">
+					<span class="Hits">{{parser.Hits}}</span>
+					<input type="checkbox" ng-model="parser.On">
+					{{::parserName}}
+					<div class="Filter" collapse="!parser.On" ng-click="selectParser(parser)">
+						<div ng-repeat="(filterName, filter) in parser.Filters | orderByKey">
+							<span class="Hits">{{filter.Hits}}</span>
+							<input type="checkbox" ng-model="filter.On">
+							{{::filterName | translate}}
+						</div>
+					</div>
+				</div>
+				<div>
+					<button type="button" class="btn btn-default pull-right" ng-click="clearHitsAndSave()" translate>Clear hits</button>
+				</div>
+			</div>
+			
+			<!-- Список файлов -->
+			<div class="PageBlock">
+				<div class="TableHead" id="FilesTableHead" translate>Files</div>
+				<div ng-repeat="file in selectedParser.Files" class="File" ng-init="isCollapsed = true">
+					<input type="checkbox" ng-model="file.On">
+					<span ng-click="isCollapsed = !isCollapsed" class="SourceInfoHeader" ng-class="{Disabled: getSourceByURL(file.URL).FailedUpdate}" tooltip="{{ getSourceByURL(file.URL).FailedUpdate | translate }}" tooltip-popup-delay="700">{{getSourceByURL(file.URL).Name}}</span>
+					<span class="glyphicon glyphicon-pencil GreenSign" ng-if="isEditable(file.URL)" ng-click="editSourceFile(file.URL)" tooltip="{{ 'Edit' | translate}}" tooltip-popup-delay="2000"></span>
+					<span class="glyphicon glyphicon-remove DeleteSign" ng-click="removeFile($index)" tooltip="{{ 'Remove for all users' | translate}}" tooltip-popup-delay="2000"></span>
+					<div collapse="isCollapsed" class="SourceInfo">
+						{{ 'Name' | translate }}: <input class="form-control input-sm" ng-model="getSourceByURL(file.URL).Name" placeholder="" required><br>
+						{{ 'URL' | translate }}: <span style="padding-left: 10px; padding-right: 10px;">{{file.URL}}</span><br><br>
+						{{ 'Comment' | translate }}: <textarea class="form-control input-sm" ng-model="getSourceByURL(file.URL).Comment"></textarea> 
+					</div>
+				</div>
+				<div ng-init="hideAddFile=true">
+					<button type="button" class="btn btn-default" ng-click="hideAddFile = !hideAddFile" style="margin-top: 2rem;">{{ 'Add file' | translate }}</button>
+					<div collapse="hideAddFile" class="SourceInfo" style="width:400px">
+						<ng-form name="AddNewSourceForm">
+							{{ 'Name' | translate }}: <input name="NameInput" class="form-control input-sm" ng-model="newSourceName" placeholder="" required>
+							{{ 'URL' | translate }}: <input class="form-control input-sm" ng-model="newSourceURL" placeholder="" ng-pattern="/^https?:\/\/[^\/]*\../" required>
+							{{ 'Comment' | translate }}: <textarea class="form-control input-sm" ng-model="newSourceComment"></textarea>
+							<div style="margin-top: 8px;">
+								<span class="glyphicon glyphicon-ok GreenSign" style="visibility: visible;" ng-click="addNewSource()"></span>
+								<span class="glyphicon glyphicon-remove DeleteSign" style="visibility: visible;" ng-click="clearNewSourceData()"></span>
+							</div>
+						</ng-form>
+					</div>
+				</div>
+				<br>
+			</div>
+		</ng-form>
+		
+	</div>
+	
+</div>

@@ -1,0 +1,2130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<?xml version="1.0"?><HTML lang=en xml:lang="en" xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>Расширения HandyCache</TITLE>
+<META content="text/html; charset=Windows-1251" http-equiv=Content-Type>
+<META name=GENERATOR content="MSHTML 8.00.7601.17622"></HEAD>
+<style type="text/css">
+	body {
+		background-color: #000000;
+		color: #FFFFFF;
+		font-family: "Trebuchet MS", Verdana, myriad pro, Arial, Helvetica, sans-serif;
+		font-size: 14px;
+	}
+	table, th, td {
+		border: 1px solid black;
+		border-collapse: collapse;
+		font-family: "Trebuchet MS", Verdana, myriad pro, Arial, Helvetica, sans-serif;
+		font-size: 14px;
+	}
+	th, td {
+		padding-top: 5px;
+		padding-right: 15px;
+		padding-left: 15px;
+		padding-bottom: 5;
+		border: 1px solid #999999;
+	}
+	a:visited, a:link {
+		color: #ff3300;
+	}
+	a:hover, a:active {
+		color: #ff9933;
+	}
+	pre {
+		display: block;
+		font-family: monospace;
+		white-space: pre;
+		margin: 1em 0;
+		font-size: 12px;
+	}
+	h2 {
+		color: #ff3300;
+		font-family: "Trebuchet MS", Verdana, myriad pro, Arial, Helvetica, sans-serif;
+		font-size: 24px;
+	}
+	h3 {
+		color: #ff3300;
+		font-family: "Trebuchet MS", Verdana, myriad pro, Arial, Helvetica, sans-serif;
+		font-size: 18px;
+	}
+</style>
+<BODY>
+<DIV align=left>
+<DIV align=left>
+<DIV align=right>
+<DIV align=left></DIV></DIV></DIV></DIV>
+<H2 align=center><U>Extensions HandyCache</U></H2>
+<P>Расширение представляет из себя организованный специальным образом скрипт на 
+языке <EM>lua.</EM></P>
+<P>Для начала использования расширений в HandyCache необходимо чтобы в папке 
+HandyCache находился файл библиотеки <EM>lua5.x.dll.</EM></P>
+<P>В начале расширения располагается заголовок. Заголовок имеет следующую 
+структуру:</P><PRE>--[[&nbsp;&lt;HCEXTENSION&gt;
+@field  value
+@field  value
+@field  value
+..
+@field  value
+&lt;/HCEXTENSION&gt; ]]
+</PRE>
+<H3 align=center>Поля заголовка расширения</H3>
+<P>
+<TABLE border=1 cellSpacing=1 cellPadding=1 width="75%" align=center>
+  <TBODY>
+  <TR>
+    <TD>
+      <P align=center><STRONG>Имя (field)</STRONG> </P></TD>
+    <TD>
+      <P align=center><STRONG>Значение (value)</STRONG> </P></TD></TR>
+  <TR>
+    <TD><STRONG>name</STRONG></TD>
+    <TD>Наименование расширения</TD></TR>
+  <TR>
+    <TD><STRONG>author</STRONG></TD>
+    <TD>Имя автора расширения</TD></TR>
+  <TR>
+    <TD><STRONG>homepage</STRONG></TD>
+    <TD>Домашняя страница расширения</TD></TR>
+  <TR>
+    <TD><STRONG>version</STRONG></TD>
+    <TD>Номер версии расширения</TD></TR>
+  <TR>
+    <TD><STRONG>min_HC_version</STRONG></TD>
+    <TD>Номер версии HandyCache, начиная с которой возможно использование 
+      данного расширения.</TD></TR>
+  <TR>
+    <TD><STRONG>description</STRONG></TD>
+    <TD>Краткое описание расширения</TD></TR>
+  <TR>
+    <TD><STRONG>rule</STRONG></TD>
+    <TD>Правило (регулярное выражение), которым будет проверяться URL запроса 
+      перед вызовом расширения. В заголовке может быть несколько полей 
+      <EM>rule</EM>.</TD></TR>
+  <TR>
+    <TD><STRONG>exception</STRONG></TD>
+    <TD>Исключение (регулярное выражение), которым будет проверяться URL 
+      запроса перед вызовом расширения. В заголовке может быть несколько полей 
+      <EM>exception</EM>.</TD></TR>
+  <TR>
+    <TD><STRONG>event</STRONG></TD>
+    <TD>Наименование события, для обработки которого будет вызываться 
+      расширение, и через косую черту имя функции, предназначенной для обработки 
+      этого события. В заголовке может быть несколько полей 
+  <EM>event</EM>.</TD></TR></TBODY></TABLE></P>
+<P></P>
+<H3 align=center>Пример заголовка расширения</H3><PRE>--[[&nbsp;&lt;HCEXTENSION&gt;
+@name            Save or block 403 and 404
+@author          DenZzz
+@homepage        http://save_and_block.com
+@version         0.01
+@min_HC_version  1.0.0.193
+@description     Сохраняет или блокирует ответы 403 и 404
+@exception       _rtsi?_|rts_chart_ru|informer\.rts\.ru/|aton-line\.ru/.*index\.gif
+@exception       ^http://[^/]*rambler\.ru/|^http://192\.168\.\d+\.
+@event           AnswerHeaderReceived/answer
+&lt;/HCEXTENSION&gt; ]]
+</PRE>
+<P align=left>За заголовком следуют функции-обработчики событий, а также функции 
+вызываемые из этих обработчиков. Когда в HandyCache наступает событие, для 
+которого зарегистрирован обработчик, вызывается соответсвующая функция.</P>
+<H3 align=center>Список обрабатываемых событий</H3>
+<P align=left>
+<TABLE border=1 cellSpacing=1 cellPadding=1 width="75%" align=center>
+  <TBODY>
+  <TR>
+    <TD>
+      <P align=center><STRONG>Событие</STRONG></P></TD>
+    <TD>
+      <P align=center><STRONG>Условия возникновения</STRONG></P></TD></TR>
+  <TR>
+    <TD><STRONG>Init</STRONG></TD>
+    <TD>Возникает при загрузке расширений во время старта HandyCache и при 
+      нажатии кнопки <EM>Перечитать расширение</EM> на вкладке 
+      <EM>Настройки/Расширения</EM>. При загрузке расширения текст файла 
+      расширения сохраняется в памяти. Поэтому, если файл расширения изменился, 
+      нужно выделить расширение в списке и нажать кнопку <EM>Перечитать 
+      расширение.</EM> </TD></TR>
+  <TR>
+    <TD><STRONG>Options</STRONG></TD>
+    <TD>Возникает при нажатии кнопки <EM>Настройки расширения</EM> на вкладке 
+      <EM>Настройки/Расширения.</EM> </TD></TR>
+  <TR>
+    <TD><STRONG>Timer1s</STRONG></TD>
+    <TD>Возникает раз в секунду.</TD></TR>
+  <TR>
+    <TD><STRONG>Timer1m</STRONG></TD>
+    <TD>Возникает раз в минуту.</TD></TR>
+  <TR>
+    <TD><STRONG>URLToFileNameConverting</STRONG></TD>
+    <TD>Возникает, когда требуется выполнить преобразование URL в имя файла в 
+      кэше.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeViewInMonitor</STRONG></TD>
+    <TD>Возникает перед созданием новой строки в мониторе.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeAuthorization</STRONG></TD>
+    <TD>Возникает, когда получен запрос от клиента и принимается решение обрабатывать запрос или отклонить.</TD></TR>
+  <TR>
+    <TD><STRONG>RequestHeaderReceived</STRONG></TD>
+    <TD>Возникает, когда получен заголовок запроса от клиента.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeRequestHeaderSend</STRONG></TD>
+    <TD>Возникает, когда заголовок запроса готов к отправке на сервер.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeRequestBodySend</STRONG></TD>
+    <TD>Возникает, когда получена очередная порция данных для отправки на 
+      сервер методом POST. </TD></TR>
+  <TR>
+    <TD><STRONG>AnswerHeaderReceived</STRONG></TD>
+    <TD>Возникает, когда получен заголовок ответа от сервера.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeAnswerHeaderSend</STRONG></TD>
+    <TD>Возникает, когда заголовок ответа готов к отправке клиенту. Заголовок 
+      может быть получен от сервера или сформирован самим HandyCache.</TD></TR>
+  <TR>
+    <TD><STRONG>BeforeAnswerBodySend</STRONG></TD>
+    <TD>Возникает, когда получена очередная порция данных для отправки 
+      клиенту. Данные могут быть получены от сервера или взяты из кэша. Если 
+      данные упакованы, то они перед передачей обработчику 
+распаковываются.</TD></TR>
+  <TR>
+    <TD><STRONG>Destroy</STRONG></TD>
+    <TD>Возникает при завершении работы расширения (при удалении расширения по 
+      кнопке Удалить расширение, при перезагрузке расширения по кнопке 
+      Перечитать расширение, при закрытии HandyCache)</TD></TR></TBODY></TABLE></P>
+<P align=left>Перед вызовом функций расширения HandyCache создает в 
+<EM>lua</EM>-машине две таблицы: <EM>hc</EM> и <EM>re</EM>. В первой собраны 
+переменные и функции, позволяющие получать информацию о значениях внутренних 
+переменных HandyCache и изменять некоторые из них. Во второй собраны функции, 
+позволяющие использовать в расширениях возможности библиотеки регулярных 
+выражений <EM>PCRE.</EM> </P>
+<P>
+<P></P>
+<P></P>
+<H3 align=center>Переменные таблицы hc, доступные в расширениях</H3>
+<TABLE border=1 cellSpacing=2>
+  <TBODY>
+  <TR>
+    <TD align=center>
+      <P><B>Имя</B></P></TD>
+    <TD align=center><STRONG>Допустимые действия</STRONG></TD>
+    <TD align=center>
+      <P><B>События</B></P></TD>
+    <TD align=center>
+      <P><B>Допустимые значения</B></P></TD>
+    <TD align=center>
+      <P><B>Описание</B></P></TD></TR>
+  <TR>
+    <TD><STRONG>ver</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend, Destroy</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Строка, содержащая версию HandyCache, например, 'Version 1.00 RC3 
+      (1.0.0.250)'</TD></TR>
+  <TR>
+    <TD><STRONG>version_number</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend, Destroy</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Строка, содержащая номер версии HandyCache, например, 
+'1.0.0.250'</TD></TR>
+  <TR>
+    <TD><STRONG>language_id</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend, Destroy</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Идентификатор языка, используемого в интерфейсе 
+      пользователя в данный момент. Список идентификаторов можно посмотреть, например, 
+      <A 
+      href="https://support.microsoft.com/en-us/kb/221435">здесь.</A></TD></TR>
+  <TR>
+    <TD><STRONG>script_name</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>BeforeAuthorization,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend, Destroy </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Путь к файлу&nbsp;текущего расширения.</TD></TR>
+  <TR>
+    <TD><STRONG>event</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>BeforeAuthorization,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySen, Destroy&nbsp; </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит наименование обрабатываемого события.</TD></TR>
+  <TR>
+    <TD><STRONG>ini_path</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerBodySend, Destroy 
+      </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит путь к папке с файлами настройки.</TD></TR>
+  <TR>
+    <TD><STRONG>exe_path</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerBodySend, Destroy 
+      </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит путь к папке с файлом HandyCache.exe.</TD></TR>
+  <TR>
+    <TD><STRONG>cache_path</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerBodySend, Destroy 
+      </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит путь к папке кэша.</TD></TR>
+  <TR>
+    <TD><STRONG>listening_port</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, URLToFileNameConverting, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerBodySend, Destroy 
+      </P></TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит порт доступа к HandyCache</TD></TR>
+  <TR>
+    <TD><STRONG>client_connected</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>BeforeViewInMonitor, RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend</TD>
+    <TD>true, false</TD>
+    <TD>Принимает значение <EM>true</EM>, если имеется соединение с клиентом, 
+      и - <EM>false</EM> , если соединение с клиентом разорвано</TD></TR>
+  <TR >
+    <TD ><STRONG>connection_index</STRONG></TD>
+    <TD >чтение</TD>
+    <TD >URLToFileNameConverting, BeforeViewInMonitor, 
+      RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD >&lt;число&gt;</TD>
+    <TD >Принимает значение&nbsp;номера соединения, для которого 
+      вызвано расширение (не путать с номером строки)</TD></TR>
+  <TR>
+    <TD><STRONG>url</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>URLToFileNameConverting, BeforeViewInMonitor,<BR>BeforeAuthorization,<BR>RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>В соответствие с RFC 2616 п.3.2.2</TD>
+    <TD>URL запроса</TD></TR>
+  <TR>
+    <TD><STRONG>method</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>В соответствие с RFC 2616 п.9</TD>
+    <TD>Метод, использованный в запросе</TD></TR>
+  <TR>
+    <TD><STRONG>is_https</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend</TD>
+    <TD>true, false</TD>
+    <TD>Принимает значение true, если текущий запрос 
+      передается по https-протоколу.</TD></TR>
+  <TR>
+    <TD>
+      <DIV><STRONG>request_ims</STRONG></DIV></TD>
+    <TD>
+      <DIV>чтение</DIV></TD>
+    <TD>
+      <DIV>BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</DIV></TD>
+    <TD>
+      <DIV>&lt;число&gt;</DIV></TD>
+    <TD>
+      <DIV>Время&nbsp;по Гринвичу&nbsp;в числовом представлении, полученное 
+      из&nbsp;поля заголовка запроса If-Modified-Since. Если поля 
+      If-Modified-Since в заголовке запроса клиента не было, то значение 
+      переменной равно нулю.</DIV></TD></TR>
+  <TR>
+    <TD>
+      <DIV>
+      <DIV><STRONG>hc_ims</STRONG></DIV></DIV></TD>
+    <TD>
+      <DIV>
+      <DIV>чтение</DIV></DIV></TD>
+    <TD>
+      <DIV>BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend</DIV></TD>
+    <TD>
+      <DIV>
+      <DIV>&lt;число&gt;</DIV></DIV></TD>
+    <TD>
+      <DIV>
+      <DIV>Время&nbsp;по Гринвичу&nbsp;в числовом представлении, 
+      добавленное&nbsp;в&nbsp;поле заголовка запроса If-Modified-Since 
+      HandyCache при включенной опции Добавить If-Modified-Since при наличии 
+      файла в кэше. Если HandyCache не добавлял свое значение в поле 
+      If-Modified-Since, то значение переменной равно нулю.</DIV></DIV></TD></TR>
+  <TR>
+    <TD><STRONG>ignore_traffic</STRONG></TD>
+    <TD>чтение, запись (только в обработчиках BeforeViewInMonitor, 
+      RequestHeaderReceived)</TD>
+    <TD>URLToFileNameConverting, BeforeViewInMonitor, RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>
+      <P>Добавив в эту строку определенные символы можно запретить учет 
+      определенного вида трафика для текущего запроса. Для запрета учета 
+      трафика, поступившего из интернета нужно добавить латинский символ "i" или 
+      кирилический "и" (строчный или заглавный). Для запрета учета трафика из 
+      кэша нужно добавить латинский символ "c" или кирилический "к". Для запрета 
+      учета отправленного трафика нужно добавить латинский символ "u" или 
+      кирилический "о". Например, для запрета учета всех видов трафика можно 
+      добавить в обработчик события строку hc.ignore_traffic='IкО'</P></TD></TR>
+  <TR>
+    <TD><STRONG>use_proxy</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит параметры внешнего HTTP прокси-сервера, назначенного для 
+      текущего запроса. Пример: <EM>"192.186.55.2:8080"</EM> или 
+      <EM>"proxy.com:8081</EM>"; если этой переменной присвоено значение 
+      <EM>"direct"</EM>, то запрос будет отправлен без использования 
+прокси</TD></TR>
+  <TR>
+    <TD><STRONG>use_proxy_login</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит логин доступа внешнего HTTP прокси-сервера, назначенного для 
+      текущего запроса (basic-авторизация). Пример: <EM>"user:password"</EM> 
+  </TD></TR>
+  <TR>
+    <TD><STRONG>use_bound_ip</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит IP-адрес сетевого устройства, через которое будет отправлен 
+      запрос. Пример: "<EM>192.186.0.2</EM>"</TD></TR>
+  <TR>
+    <TD><STRONG>request_header</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeViewInMonitor (только чтение), BeforeAuthorization (только чтение), RequestHeaderReceived, 
+      BeforeRequestHeaderSend</TD>
+    <TD>В соответствие с RFC 2616</TD>
+    <TD>Содержит заголовок запроса. Если расширение изменит значение этой 
+      переменной, измененный заголовок будет отправлен серверу.</TD></TR>
+  <TR>
+    <TD>
+      <DIV><STRONG>request_body</STRONG></DIV></TD>
+    <TD>
+      <DIV>чтение, запись</DIV></TD>
+    <TD>
+      <DIV>BeforeRequestHeaderSend, BeforeRequestBodySend</DIV></TD>
+    <TD>
+      <DIV>"&lt;строка&gt;"</DIV></TD>
+    <TD>
+      <DIV>Пример расширения для обработки тела запроса:</DIV>
+      <DIV>&nbsp;</DIV>
+      <DIV>--[[ &lt;HCExtension&gt;<BR>@name ReqBody<BR>@author mai<BR>@version 
+      0.2<BR>@description Example<BR>@min_HC_version 1.0.0.310<BR>@rule 
+      mmm\.ru/form/<BR>@event BeforeRequestHeaderSend/header<BR>@event 
+      BeforeRequestBodySend/body<BR>&lt;/HCExtension&gt; ]]<BR></DIV>
+      <DIV>&nbsp;</DIV>
+      <DIV>function header()<BR>&nbsp; if hc.method == 'POST' 
+      then<BR>&nbsp;&nbsp;&nbsp; local s1= re.find(hc.request_header, 
+      [[[^\r]*\r\n]], 0)<BR>&nbsp;&nbsp;&nbsp; local s2= 
+      re.replace(hc.request_header, [[[^\r]*\r\n]], '')<BR>&nbsp;&nbsp;&nbsp; 
+      hc.request_header = s1<BR>&nbsp;&nbsp;&nbsp; hc_static['req_header']= 
+      s2<BR>&nbsp; end<BR>end<BR></DIV>
+      <DIV>&nbsp;</DIV>
+      <DIV>function body()<BR>&nbsp; if not hc_static['req_body'] then 
+      hc_static['req_body']= '' end<BR>&nbsp; hc_static['req_body']= 
+      hc_static['req_body']..hc.request_body<BR>&nbsp; hc.request_body= 
+      ''<BR>&nbsp; if hc.last_part then<BR>&nbsp;&nbsp;&nbsp; -- Здесь 
+      выполняются необходимые действия над телом запроса<BR>&nbsp;&nbsp;&nbsp; 
+      -- Затем корректируется заголовок запроса, например, 
+      заменяется<BR>&nbsp;&nbsp;&nbsp; -- длина тела 
+      запроса<BR>&nbsp;&nbsp;&nbsp; hc.request_body= 
+      hc_static['req_header']..hc_static['req_body']<BR>&nbsp;&nbsp;&nbsp; 
+      hc_static['req_header']= nil<BR>&nbsp;&nbsp;&nbsp; hc_static['req_body']= 
+      nil<BR>&nbsp; end<BR>end</DIV>
+      <DIV><BR>В обработчике BeforeRequestHeaderSend header() первая строка 
+      заголовка запроса отсылается на сервер а остальные строки заголовка 
+      запоминаются в таблице hc_static. В обработчике BeforeRequestBodySend 
+      body() расширение получает порции тела запроса из переменной 
+      hc.request_body и сохраняет их в таблице hc_static. Когда переменной 
+      hc.last_part будет присвоено значение&nbsp;<EM>true</EM>, 
+      расширение&nbsp;должно исправить тело и заголовок запроса в соответствии с 
+      замыслом автора расширения&nbsp;и отослать&nbsp;их на сервер.</DIV></TD></TR>
+  <TR>
+    <TD><STRONG>cache_file_name</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+AnswerHeaderReceived</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Имя файла в кэше, соответсвующего текущему запросу (пустая строка, 
+      если файла нет).</TD></TR>
+  <TR>
+    <TD><STRONG>cache_file_size</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+AnswerHeaderReceived</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Размер файла в кэше (-1, если файла нет) за 
+      вычетом служебной информации, расположенной в конце файла.</TD></TR>
+  <TR>
+    <TD><STRONG>cache_file_age</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+AnswerHeaderReceived</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Возраст (интервал времени&nbsp;между моментом последнего обновления 
+      файла и текущим моментом) файла в кэше в секундах (0, если файла 
+  нет).</TD></TR>
+  <TR>
+    <TD><STRONG>cache_file_content_type</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+AnswerHeaderReceived</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Тип содержимого файла в кэше (пустая строка, если файла нет в кэше или 
+      если не удалось определить его тип).<BR></TD></TR>
+  <TR>
+    <TD><STRONG>cache_file_date_now</STRONG></TD>
+    <TD>запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, 
+AnswerHeaderReceived</TD>
+    <TD>true</TD>
+    <TD>При присвоении этой переменной значения true дате модификации файла в кэше 
+      присваивается текущая дата.<BR></TD></TR>
+  <TR>
+    <TD><STRONG>user_name</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>URLToFileNameConverting, BeforeViewInMonitor, RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Имя пользователя, от которого поступил запрос.</TD></TR>
+  <TR>
+    <TD><STRONG>user_ip</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>URLToFileNameConverting, BeforeViewInMonitor,<BR>BeforeAuthorization,<BR>RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>IP комрпьютера, с которого поступил запрос пользователя.</TD></TR>
+  <TR>
+    <TD><STRONG>user_from_internet</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Количество данных, полученных пользователем из интернета за текущие 
+      сутки.</TD></TR>
+  <TR>
+    <TD><STRONG>user_from_cache</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Количество данных, полученных пользователем из кэша за текущие 
+    сутки.</TD></TR>
+  <TR>
+    <TD><STRONG>user_to_internet</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Количество данных, отправленных пользователем за текущие сутки.</TD></TR>
+  <TR>
+    <TD><STRONG>answer_header</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>В соответствие с RFC 2616</TD>
+    <TD>Заголовок ответа, полученный от сервера или сформированный 
+      расширением. Если этой переменной расширение присвоило новое значение, то 
+      клиенту будет передан измененный заголовок.<BR>В кэш при ответе 302 
+      записывается заголовок, полученный от сервера. 
+      Заголовок, сформированный расширением, в кэш не записывается.</TD></TR>
+  <TR>
+    <TD><STRONG>answer_body</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>
+      <P>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</P>   
+        </TD>
+    <TD>"&lt;строка&gt;", <BR>"file=&lt;имя файла&gt;", 
+      <BR>"file=URLToCache(&lt;URL&gt;)"</TD>
+    <TD>
+      <P>При обработке событий <EM>RequestHeaderReceived, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend</EM> содержит тело ответа, сформированное 
+      расширением. Если этой переменной присвоено значение, то клиенту будет 
+      передано содержимое этой переменной в качестве тела ответа.<BR>
+      В кэш записывается тело ответа, полученное от сервера. 
+      Тело ответа, сформированный расширением, в кэш не записывается.<BR>
+      Этой переменной вместо непосредственно тела ответа может быть присвоено также 
+      имя файла, который будет использован в качестве тела ответа 
+      (<EM>"file=c:\abc\qwerty.html"</EM>), или URL 
+      (<EM>"file=URLToCache(http://site.ru/abc.gif)"</EM>). В последнем случае в 
+      качестве тела ответа будет использован файл в кэше, соответствующий 
+      указанному URL.</P>
+      <P>При обработке события <EM>BeforeAnswerBodySend</EM> через эту 
+      переменную расширение получает очередную порцию данных для обработки. В 
+      эту же переменную расширение записывает результат обработки.</P></TD></TR>
+  <TR>
+    <TD><STRONG>last_part</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>BeforeAnswerBodySend</TD>
+    <TD>true, false</TD>
+    <TD>Принимает значение true, когда расширение вызывается последний раз для 
+      обработки текущего запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>action</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeAuthorization,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, AnswerHeaderReceived</TD>
+    <TD>
+      <U>Для BeforeAuthorization:</U><BR>
+      если присвоить имя пользователя из списка пользователей (пользователь должен быть разрешен), 
+      то запрос будет обработан
+      <HR> 
+      <U>Для RequestHeaderReceived и BeforeRequestHeaderSend:</U><BR>
+      можно использовать все допустимые значения 
+      <HR>
+      <U>Для AnswerHeaderReceived:</U><BR>"stop", <BR>"dont_update", <BR>"save", 
+      <BR>"dont_save"</TD>
+    <TD>Действие, которое должен выполнить НС: 
+      <UL>
+        <LI><EM>"stop"</EM> - заблокировать загрузку; 
+        <LI><EM>"dont_update"</EM> - не обновлять файл (отдать из кэша). 
+        <LI><EM>"only_from_cache"</EM> - если файл есть в кэше, то отдать его 
+        клиенту, иначе заблокировать загрузку. 
+        <LI><EM>"save"</EM> - записать файл в кэш; 
+        <LI><EM>"dont_save"</EM> - не записывать файл в кэш, даже если сработал 
+        список <EM>Запись в кэш.</EM> </LI></UL>Если поставить знак "-" в конце 
+      названия действия, то данное действие будет применено только в случае 
+      активности соответствующего списка для данного запроса. Например: действие 
+      <EM>"stop-"</EM> заблокирует загрузку, только если <EM>Черный список</EM> 
+      не был отключен галкой <EM>Разрешить</EM>, горячей клавишей или <EM>Белым 
+      списком.</EM> </TD></TR>
+  <TR>
+    <TD><STRONG>extensions_on</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, BeforeRequestHeaderSend, BeforeRequestBodySend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>true, false</TD>
+    <TD>Если присвоить этой переменной значение <EM>false</EM>, то для 
+      текущего запроса все последующие обработчики событий вызываться уже не 
+      будут.</TD></TR>
+  <TR>
+    <TD><STRONG>read_from_cache_on</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived</TD>
+    <TD>true, false</TD>
+    <TD>Присвоение <EM>false</EM> запрещает чтение из кэша для текущего 
+      запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>add_ims_on</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived</TD>
+    <TD>true, false</TD>
+    <TD>Присвоение значения этой переменной управляет опцией Добавить if-Modified-Since при наличии файла в кэше для текущего 
+      запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>offline_disable</STRONG></TD>
+    <TD>запись</TD>
+    <TD>RequestHeaderReceived</TD>
+    <TD>true, false</TD>
+    <TD>Присвоение этой переменной <EM>true</EM> запрещает автономный режим для текущего 
+      запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>ramcache_disable</STRONG></TD>
+    <TD>запись</TD>
+    <TD>RequestHeaderReceived</TD>
+    <TD>true, false</TD>
+    <TD>Присвоение этой переменной <EM>true</EM> запрещает использование RAM-кэш для текущего 
+      запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>white_mask</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeViewInMonitor, RequestHeaderReceived</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Маска <EM>Белого списка</EM> - в эту переменную можно добавить по 
+      одному символу для каждого из списков, если нужно, чтобы этот список не 
+      работал с данным запросом. Для обозначения списков можно использовать 
+      символы: 
+      <UL>
+        <LI>W или Б - Белый список 
+        <LI>B или Ч - Черный список 
+        <LI>S или З - список Запись в кэш 
+        <LI>D или Н - список Не обновлять 
+        <LI>O или Т - список Только из кэша 
+        <LI>R или А - список Переадресация 
+        <LI>U или П - список Преобразование URL </LI></UL>Символы могут быть 
+      строчные или заглавные. Например, для выключения <EM>Черного списка</EM>, 
+      списка <EM>Только из кэша</EM> и списка <EM>Преобразование URL</EM> 
+      значение переменной может быть такое: hc.white_mask="ЧТu". Запрет начинает 
+      действовать немедленно после присвоения значенияпеременной.</TD></TR>
+  <TR>
+    <TD><STRONG>file_speed_limit</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, AnswerHeaderReceived</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Если этой переменной присвоить значение больше 0, то это значение будет использоваться как лимит скорости (в 
+      байтах в секунду) для загрузки данного файла. Присвоение переменной значения 0 
+      снимает ограничение.</TD></TR>
+  <TR>
+    <TD><STRONG>user_speed_limit</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, AnswerHeaderReceived</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Если этой переменной присвоить значение больше 0, то это значение 
+      будет использоваться как лимит скорости (в байтах в секунду) для данного 
+      пользователя до задания другого значения или перезапуска HandyCache. 
+      <EM>hc.user_speed_limit</EM>=0 снимает ограничения скорости для данного 
+      пользователя.</TD></TR>
+  <TR>
+    <TD><STRONG>freezed_disconnection_time</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>RequestHeaderReceived, AnswerHeaderReceived</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Если этой переменной присвоить значение больше 0, то это значение 
+      будет использоваться как интервал до разрыва застывшего соединения  
+      (в секундах) для данного соединения. 
+     </TD></TR>
+  <TR>
+    <TD><STRONG>dont_load_large_files_on</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend </P></TD>
+    <TD>true, false</TD>
+    <TD>Принимает текущее состояние опции Не загружать большие файлы.</TD></TR>
+  <TR>
+    <TD><STRONG>speed_limit_on</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend </P></TD>
+    <TD>true, false</TD>
+    <TD>Принимает текущее состояние опции Ограничить скорость загрузки.</TD></TR>
+  <TR>
+    <TD><STRONG>offline_on</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>
+      <P>Init, Options, Timer1s, Timer1m, 
+      BeforeViewInMonitor,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      AnswerHeaderReceived, BeforeAnswerHeaderSend, BeforeAnswerBodySend </P></TD>
+    <TD>true, false</TD>
+    <TD>Принимает текущее состояние опции Автономный режим.</TD></TR>
+  <TR>
+    <TD><STRONG>monitor_index</STRONG></TD>
+    <TD>чтение</TD>
+    <TD>BeforeViewInMonitor,<BR>RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Принимает значение номера строки в мониторе, соответствующей текущему 
+      запросу.</TD></TR>
+  <TR>
+    <TD><STRONG>hide_in_active_list</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeViewInMonitor</TD>
+    <TD>true, false</TD>
+    <TD>Если этой переменной присвоено значение true, то строка в в списке 
+      активных запросов, соответсвующая текущему запросу будет спрятана.</TD></TR>
+  <TR>
+    <TD><STRONG>hide_in_monitor</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeViewInMonitor, RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend</TD>
+    <TD>true, false</TD>
+    <TD>Если этой переменной присвоено значение true, то строка в мониторе, 
+      соответсвующая текущему запросу будет спрятана.</TD></TR>
+  <TR>
+    <TD><STRONG>monitor_text_color</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>BeforeViewInMonitor,<BR>BeforeAuthorization,<BR>RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend</TD>
+    <TD>&lt;число&gt;</TD>
+    <TD>Задает цвет текста в строке монитора. Если уровни основных цветовых 
+      составляющих R, G и B, то цвет задается числом R+G*256+B*256*256. R, G и B 
+      могут принимать значения от 0 до 255.</TD></TR>
+  <TR>
+    <TD><STRONG>monitor_parent_url</STRONG></TD>
+    <TD>чтение, запись (только в обработчике BeforeViewInMonitor)</TD>
+    <TD>BeforeViewInMonitor, RequestHeaderReceived, BeforeRequestHeaderSend, 
+      BeforeRequestBodySend, AnswerHeaderReceived, BeforeAnswerHeaderSend, 
+      BeforeAnswerBodySend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Задает URL строки монитора, которая будет 'родительской' для строки 
+      текущего запроса. Если переменной значение не было присвоено, то при 
+      чтении этой переменной выдается значение поля Referer заголовка 
+  запроса.</TD></TR>
+  <TR>
+    <TD><STRONG>monitor_string</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>URLToFileNameConverting,<BR>BeforeAuthorization,<BR>BeforeViewInMonitor, RequestHeaderReceived, 
+      BeforeRequestHeaderSend, BeforeRequestBodySend, AnswerHeaderReceived, 
+      BeforeAnswerHeaderSend, BeforeAnswerBodySend</TD>
+    <TD>"&lt;строка&gt;"</TD>
+    <TD>Содержит значение, присвоенное предыдущими расширениями при обработке 
+      текущего события. Расширение может присвоить свое значение этой 
+      переменной. Значение этой переменной будет выведено в колонке Правила в 
+      Мониторе в строке текущего запроса.<BR>
+      Если навести указатель мыши на сообщение в колонке Правило, будет выведен хинт, 
+      который может содержать дополнительную информацию. Ту часть сообщения, которая 
+      предназначена для вывода в хинт, нужно обрамлять с двух сторон последовательностями 
+      символов #~#. Например, так hc.monitor_string = hc.monitor_string .. 'Message' .. '
+      #~#This is a hint#~#,' 
+      </TD></TR></TBODY></TABLE>
+<P></P>
+<H3 align=center>Функции таблицы hc</H3>
+<P></P>
+<TABLE border=1 cellSpacing=2>
+  <TBODY>
+  <TR>
+    <TD>
+      <P align=center><STRONG>Имя</STRONG></P></TD>
+    <TD>
+      <P align=center><STRONG>Описание</STRONG></P></TD></TR>
+  <TR>
+    <TD><STRONG>shell_execute</STRONG></TD>
+    <TD>
+      <P>Функция является оберткой Windows API функции ShellExecute (аргумент 
+      <EM>Operation="Open")</EM>. Подробнее смотрите <A 
+      href="http://msdn.microsoft.com/en-us/library/bb762153%28VS.85%29.aspx">здесь</A>.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>File</STRONG> - </EM>имя 
+      открываемого файла;<BR><EM><STRONG>Parameters</STRONG> -</EM> строка 
+      параматров, которая будет послана открываемому 
+      приложению;<BR><EM><STRONG>Directory</STRONG> -</EM> стандартный каталог 
+      (default directory), передаваемый 
+      приложению.<BR><EM><STRONG>ShowCmd</STRONG> -</EM> флаг, задающий 
+      состояние окна приложения при открытии, может принимать 
+      значения&nbsp;'SW_HIDE', 'SW_MAXIMIZE', 'SW_MINIMIZE', 'SW_RESTORE', 
+      'SW_SHOW', 'SW_SHOWDEFAULT','SW_SHOWMAXIMIZED', 'SW_SHOWMINIMIZED', 
+      'SW_SHOWMINNOACTIVE', 'SW_SHOWNA', 'SW_SHOWNOACTIVATE', 
+      'SW_SHOWNORMAL'.<BR><EM><STRONG>Wait</STRONG> -</EM> принимает значение <EM>true</EM> или 
+      <EM>false</EM>; если присвоено значение <EM>true</EM>, то функция будет 
+      ожидать выполнения запущенной операции, в противном случае ожидания не 
+      будет.</P>
+      <P><U>Возвращаемое значение:</U> Возвращает строку 'OK' при успешном 
+      вызове функции. В случае ошибки, возвращает сообщение об ошибке.</P>
+      <P><U>Пример использования:</U> <EM>hc.shell_execute('notepad.exe', 
+      'stat.txt', nil, 'SW_SHOW')</EM> </P></TD></TR>
+  <TR >
+    <TD ><STRONG>execute_and_wait</STRONG></TD>
+    <TD >
+      <P>Функция запускает на выполнение программу и дожидается ее 
+      завершения.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Cmd</STRONG> - 
+      </EM>имя&nbsp;программы; если нужно через пробел можно добавить аргументы 
+      для вызываемой программы.</P>
+      <P><U>Возвращаемое значение:</U> Код завершения запускаемой программы.</P>
+      <P><U>Пример использования:</U> 
+      <EM>hc.execute_and_wait('notepad.exe&nbsp;stat.txt')</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>play_sound</STRONG></TD>
+    <TD>
+      <P>Функция является оберткой Windows API функции PlaySound. Подробнее 
+      смотрите <A 
+      href="http://msdn.microsoft.com/en-us/library/ms712879.aspx">здесь</A>.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Sound</STRONG></EM> - имя 
+      wav-файла или системного события ('SystemAsterisk', 'SystemDefault', 
+      'SystemExclamation', 'SystemExit', 'SystemHand', 'SystemQuestion', 
+      'SystemStart', 'SystemWelcome').<BR></P>
+      <P><U>Возвращаемое значение:</U> нет.</P>
+      <P><U>Примеры использования:</U> 
+      <BR><EM>hc.play_sound('blocked.wav')<BR>hc.play_sound('SystemExclamation')</EM> 
+      </P></TD></TR>
+  <TR >
+    <TD ><STRONG>crc32</STRONG></TD>
+    <TD >
+      <P>Функция выполняет подсчет хэша crc32&nbsp;для входной строки.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Str</STRONG> - </EM>входная 
+      строка.</P>
+      <P><U>Возвращаемое значение:</U> Crc32 хэш-код входной строки (число).</P>
+      <P><U>Пример использования:</U> crc = <EM>hc.crc32(str_line)</EM> 
+  </P></TD></TR>
+  <TR>
+  <TD><STRONG>compress</STRONG></TD>
+    <TD>
+      <P>Функция выполняет упаковку строки, используя алгоритм gzip.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Str</STRONG> - </EM>входная 
+      строка.</P>
+      <P><U>Возвращаемое значение:</U> Упакованная строка.</P>
+      <P><U>Пример использования:</U> gzip = 
+  <EM>hc.compress(str_line)</EM></P></TD></TR>
+  <TR>
+  <TD><STRONG>uncompress</STRONG></TD>
+    <TD>
+      <P>Функция выполняет распаковку строки, используя алгоритм gzip.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Str</STRONG> - </EM>входная 
+      строка.</P>
+      <P><U>Возвращаемое значение:</U> Распакованная строка.</P>
+      <P><U>Пример использования:</U> out = 
+  <EM>hc.uncompress(str_line)</EM></P></TD></TR>
+  <TR>
+  <TD><STRONG>encode_base64</STRONG></TD>
+    <TD>
+      <P>Функция выполняет кодирование строки в формате base64.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Str</STRONG> - </EM>входная 
+      строка.</P>
+      <P><U>Возвращаемое значение:</U> Результат кодирования строки.</P>
+      <P><U>Пример использования:</U> crc = 
+  <EM>hc.encode_base64(str_line)</EM></P></TD></TR>
+  <TD><STRONG>decode_base64</STRONG></TD>
+    <TD>
+      <P>Функция выполняет декодирование строки, кодированной в формате 
+      base64.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>Str</STRONG> - </EM>входная 
+      строка.</P>
+      <P><U>Возвращаемое значение:</U> Результат декодирования строки.</P>
+      <P><U>Пример использования:</U> crc = 
+  <EM>hc.decode_base64(str_line)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>recode</STRONG></TD>
+    <TD>
+      <P>Функция выполняет преобразование одной кодировки строки в другую.</P>
+      <P><U>Аргументы функции:<BR></U><EM><STRONG>Str</STRONG> -&nbsp; 
+      </EM>строка для преобразования;<BR><EM><STRONG>InCP</STRONG> -</EM> 
+      &nbsp;&nbsp;кодировка входной строки;<BR><EM><STRONG>OutCP</STRONG> -</EM> 
+      &nbsp;кодировка выходной строки;<BR><EM><STRONG>Flags</STRONG>&nbsp;-</EM> флаги, 
+      управляющие преобразованием; если этот аргумент пропущен, то используется 
+      значение 0;<BR>Значения&nbsp;некоторых&nbsp;флагов:<BR>WC_COMPOSITECHECK 
+      = 512<BR>WC_DISCARDNS = 16<BR>WC_SEPCHARS =       32<BR>WC_DEFAULTCHAR = 
+      64<BR>Назначение флагов можно посмотреть в описании функции 
+      <STRONG>WideCharToMultiByte</STRONG>, например, <A 
+      href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd374130%28v=vs.85%29.aspx" 
+      rel=nofollow>здесь</A>.<BR><EM><STRONG>DefaultChar</STRONG>&nbsp;-</EM>&nbsp;символ, 
+      который будет помещен в строку, если в указанной кодировке символ не может 
+      быть представлен;&nbsp;если аргумент пропущен, то выводится символ 
+      '?'.<BR>Номера некоторых часто встречающихся кодовых 
+      страниц:<BR>utf8 - 65001<BR>Cyrillic (DOS) - 866<BR>Cyrillic (iso-8859-5) 
+      - 28595<BR>Cyrillic (KOI8-R) - 20866<BR>Cyrillic (windows-1251) - 
+      1251<BR>Номера других кодовых страниц можно посмотреть, например, <A 
+      href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx" 
+      rel=nofollow>здесь</A>.<BR>Вместе с кодировками входной и выходной строк 
+      можно использовать модификаторы. Применение модификатора 100000 приводит к 
+      использованию дополнительного кодирования строки в виде %XXX (см. 
+      примеры). Модификатор 200000 инициирует использование puny-кода. 
+      <P><U>Возвращаемое значение:</U> 
+      <STRONG>Первым</STRONG> значением возвращается выходная строка 
+      в&nbsp;заданной кодировке. <STRONG>Вторым</STRONG> значением является 
+      <EM>true</EM> или <EM>false</EM> в зависимости от того потебовалось 
+      использовать символ&nbsp;<STRONG><EM>DefaultChar</EM></STRONG>   или нет.</P>
+      <P><U>Примеры использования:</U><BR><EM>local new_str= hc.recode(str, 
+      20866, 1251)<BR>local x_str=                                   hc.recode('привет', 1251, 1251+100000)&nbsp; 
+      -- x_str будет присвоено ''%EF%F0%E8%E2%E5%F2'<BR>local w_str= 
+      hc.recode('%EF%F0%E8%E2%E5%F2', 1251+100000, 1251)&nbsp; -- w_str будет 
+      присвоено 'привет'<BR>local utf8_str=                                   hc.recode('привет', 1251, 
+      65001+100000)&nbsp; -- utf8_str будет присвоено 
+      '%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82'<BR>local ww_str= 
+      hc.recode('%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82', 65001+100000, 
+      1251)&nbsp; -- ww_str будет присвоено 'привет'<BR>local puny_str= 
+      hc.recode('привет', 1251, 1251+200000)&nbsp; -- puny_str будет присвоено 
+      'b1agh1afp'<BR>local win_str=  hc.recode('b1agh1afp', 1251+200000, 
+      1251)&nbsp; -- win_str будет присвоено 'привет'</EM> </P>
+      <P><EM>local WC_COMPOSITECHECK =                                 512 --convert 
+      composite to precomposed<BR>local WC_DEFAULTCHAR = 64 --replace w default 
+      char<BR>local s,b = hc.recode('абвгд 12345 abcde', 1251, 28591, 
+      WC_COMPOSITECHECK+WC_DEFAULTCHAR, '#') --s будет присвоено '##### 12345 
+      abcde',&nbsp;а b - true</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>execute_cmd</STRONG></TD>
+    <TD>
+      <P>Функция выполняет команду (те же команды, что и для утилиты HCCmd).</P>
+      <P><U>Аргументы функции:<BR></U><EM><STRONG>Cmd</STRONG></EM> 
+      -&nbsp;команда.</P>
+      <P>Список команд.<BR>'AddToWhiteList URL' - добавить в Белый список 
+      <BR>'AddToBlackList URL' - добавить в Черный список 
+      <BR>'AddToSaveToCacheList URL' - добавить в список Запись в кэш 
+      <BR>'AddToDontUpdateList URL' - добавить в список Не обновлять 
+      <BR>'AddToOnlyFromCacheList URL' - добавить в список Только из кэша 
+      <BR>'ViewWindow' - показать главное окно <BR>'ViewWhiteList' - показать 
+      Белый список <BR>'ViewBlackList' - показать Черный список 
+      <BR>'ViewSaveToCacheList' - показать список Запись в кэш 
+      <BR>'ViewDontUpdateList' - показать список Не обновлять 
+      <BR>'ViewOnlyFromCacheList' - показать список Только из кэша 
+      <BR>'WhiteList on|off|switch' - управление Белым списком <BR>'BlackList 
+      on|off|switch' - управление Черным списком <BR>'SaveToCacheList 
+      on|off|switch' - управление списком Запись в кэш <BR>'DontUpdateList 
+      on|off|switch' - управление списком Не обновлять <BR>'OnlyFromCacheList 
+      on|off|switch' - управление списком Только из кэша <BR>'OffLine 
+      on|off|switch' - управление Автономным режимом <BR>'RedirectList 
+      on|off|switch' - управление списком Переадресация <BR>'FreshFiles 
+      on|off|switch' - управление опцией Не обновлять свежие файлы 
+      <BR>'ReadFromCache on|off|switch' - управление чтением из кэша 
+      <BR>'LoadURL' - загрузить URL в кэш <BR>'DeleteURL' - удалить URL из кэша 
+      <BR>'StopURL' - остановить загрузку URL <BR>'ClearCache' - запустить 
+      очистку кэша <BR>'Exit' - завершить выполнение программы 
+      <BR>'URLTransformingList on|off|switch' - управление списком 
+      Преобразование URL <BR>'DontLoadLargeFiles on|off|switch' - управление 
+      опцией Не загружать большие файлы <BR>'SpeedLimit on|off|switch' - 
+      управление опцией Ограничить скорость загрузки <BR>'MediatorServers 
+      on|off|switch' - управление списком серверов-посредников <BR>'DNSCache 
+      on|off|switch' - управление DNS-кэшем <BR>'ParentProxy on|off|switch' - 
+      управление внешними прокси <BR>'UnconditionalProxy on|off|switch' - 
+      управление безусловными прокси <BR>'ConditionalProxy on|off|switch' - 
+      управление условными прокси <BR>'Statistics on|off|switch' - управление 
+      ведением статистики<BR>'SelectCacheDirSet 1|2' - выбрать активный набор 
+      каталогов кэша<BR>'SetMainCacheDir1 DirPath' - задать основной каталог 
+      первого набора<BR>'SetMainCacheDir2 DirPath' - задать основной каталог 
+      второго набора<BR>'SetROCacheDir1 DirPath' - задать каталог кэша только 
+      для чтения первого набора<BR>'SetROCacheDir2 DirPath' - задать каталог 
+      кэша только для чтения второго набора<BR>'SelectParentProxy 
+      ProxyName' - задать текущий безусловный родительский 
+      прокси<BR>'ViewExtensionsList' - показать список 
+      расширений<BR>'EnableExtension ExtName' - разрешить работу 
+      расширения<BR>'DisableExtension ExtName' - запретить 
+      работу расширения<BR>'ReloadExtension ExtName' 
+      -&nbsp;перечитать&nbsp;расширение из файла</P>
+      
+      <P><U>Возвращаемое значение:</U> нет.</P>
+      <P><U>Примеры использования:</U> <BR><EM>hc.execute_cmd('BlackList 
+      on')<BR>hc.execute_cmd('ClearCache') </EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>send_request</STRONG></TD>
+    <TD>
+      <P>Функция&nbsp;отправляет&nbsp;через HandyCache http-запрос. Этот запрос 
+      обрабатывается HandyCache таким же образом, как все другие запросы, 
+      проходящие через него (работают все опции, списки, расширения).</P>
+      <P><U>Аргументы функции:<BR></U><STRONG><EM>header&nbsp;-</EM></STRONG> 
+      заголовок http-запроса;<BR><STRONG><EM>body</EM></STRONG>&nbsp;-&nbsp;тело 
+      http-запроса для метода POST.<BR>
+      <STRONG><EM>https_header</EM></STRONG>&nbsp;-&nbsp;заголовок для 
+      формирования https-запроса к прокси-серверу.</P>
+      <P><U>Возращаемое значение:</U> нет.</P>
+      <P><U>Пример использования:</U><BR>
+      <EM>hdr =      'GET http://mail.ru HTTP/1.0\r\nConnection: 
+      close\r\n\r\n'<BR>hc.send_request(hdr)</EM><BR>
+      <EM>или</EM><BR>
+      <EM>hdr = 'GET http://mail.ru HTTP/1.0\r\n'..<BR>'Connection: close\r\n\r\n'<BR>https_hdr =&nbsp; 'CONNECT 
+      mail.ru:443 HTTP/1.1\r\n'..<BR>'Host: mail.ru\r\n'..<BR>'Connection: 
+      keep-alive\r\n\r\n'<BR>hc.send_request(hdr, '', 
+      https_hdr)<BR></EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>sleep</STRONG></TD>
+    <TD>
+      <P>Функция останавливает выполнение расширения на заданный интервал 
+      времени.</P>
+      <P><U>Аргументы функции:<BR></U><STRONG>t</STRONG>&nbsp;-&nbsp;интервал 
+      времени в миллисекундах.</P>
+      <P><U>Возращаемое значение:</U> нет.</P>
+      <P><U>Пример использования:</U> <EM>hc.sleep(1000)</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>put_msg</STRONG></TD>
+    <TD>
+      <P>Функция вызывает появление на экране информационного окошка с заданным 
+      сообщением.</P>
+      <P><U>Аргументы функции:<BR></U><STRONG><EM>time -</EM></STRONG> если 
+      первый аргумент является числом и количество аргументов больше одного, то 
+      первый аргумент&nbsp;интерпретируется как время нахождения сообщения на 
+      экране в секундах, может принимать значения от 1 до 20; сообщение будет 
+      находиться на экране до тех пор, пока не истечет время, заданное 
+      параметром <EM><STRONG>time</STRONG></EM>, или не будет вызвано на экран 
+      другое сообщение; если этот аргумент не задан, то сообщение будет 
+      находиться на экране 5 
+      секунд;<BR><EM><STRONG>msg</STRONG></EM>&nbsp;-&nbsp;сообщение.</P>
+      <P><U>Возращаемое значение:</U> нет.</P>
+      <P><U>Пример использования:</U> <EM>hc.put_msg(10, 'Очистка кэша 
+      запущена')</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>put_to_log</STRONG></TD>
+    <TD>
+      <P>Функция помещает заданное сообщение в лог программы.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>msg</STRONG></EM>&nbsp;-&nbsp;сообщение; 
+      сообщение может состоять из нескольких частей, разделенных запятыми; 
+      каждая из частей может быть строкой или числом;</P>
+      <P><U>Возращаемое значение:</U> нет.</P>
+      <P><U>Пример использования:</U> 
+      <EM>hc.put_to_log('method='..hc.method)</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>get_keyboard_state</STRONG></TD>
+    <TD>
+      <P>Функция получает список нажатых клавиш.</P>
+      <P><U>Аргументы функции:</U> нет.</P>
+      <P><U>Возвращаемое значение:</U> Строка со списком нажатых 
+      клавиш.<BR>Перечень имен клавиш:<BR>'VK_LBUTTON', 'VK_RBUTTON', 
+      'VK_CANCEL', 'VK_MBUTTON', 'VK_XBUTTON1', 'VK_XBUTTON2','VK_BACK', 
+      'VK_TAB', 'VK_CLEAR', 'VK_RETURN', 'VK_SHIFT', 'VK_CONTROL', 
+      'VK_MENU','VK_PAUSE', 'VK_CAPITAL', 'VK_KANA', 'VK_JUNJA', 'VK_FINAL', 
+      'VK_HANJA', 'VK_KANJI','VK_ESCAPE', 'VK_CONVERT', 'VK_NONCONVERT', 
+      'VK_ACCEPT', 'VK_MODECHANGE', 'VK_SPACE','VK_PRIOR', 'VK_NEXT', 'VK_END', 
+      'VK_HOME', 'VK_LEFT', 'VK_UP', 'VK_RIGHT', 'VK_DOWN','VK_SELECT', 
+      'VK_PRINT', 'VK_EXECUTE', 'VK_SNAPSHOT', 'VK_INSERT', 
+      'VK_DELETE','VK_HELP', 'VK_0', 'VK_1', 'VK_2', 'VK_3', 'VK_4', 'VK_5', 
+      'VK_6', 'VK_7', 'VK_8', 'VK_9','VK_A', 'VK_B', 'VK_C', 'VK_D', 'VK_E', 
+      'VK_F', 'VK_G', 'VK_H', 'VK_I', 'VK_J','VK_K', 'VK_L', 'VK_M', 'VK_N', 
+      'VK_O', 'VK_P', 'VK_Q', 'VK_R', 'VK_S', 'VK_T','VK_U', 'VK_V', 'VK_W', 
+      'VK_X', 'VK_Y', 'VK_Z', 'VK_LWIN', 'VK_RWIN', 'VK_APPS','VK_SLEEP', 
+      'VK_NUMPAD0', 'VK_NUMPAD1', 'VK_NUMPAD2', 'VK_NUMPAD3', 
+      'VK_NUMPAD4','VK_NUMPAD5', 'VK_NUMPAD6', 'VK_NUMPAD7', 'VK_NUMPAD8', 
+      'VK_NUMPAD9', 'VK_MULTIPLY', 'VK_ADD', 'VK_SEPARATOR', 'VK_SUBTRACT', 
+      'VK_DECIMAL', 'VK_DIVIDE', 'VK_F1', 'VK_F2','VK_F3', 'VK_F4', 'VK_F5', 
+      'VK_F6', 'VK_F7', 'VK_F8', 'VK_F9', 'VK_F10', 'VK_F11','VK_F12', 'VK_F13', 
+      'VK_F14', 'VK_F15', 'VK_F16', 'VK_F17', 'VK_F18', 'VK_F19','VK_F20', 
+      'VK_F21', 'VK_F22', 'VK_F23', 'VK_F24', 'VK_NUMLOCK', 
+      'VK_SCROLL','VK_LSHIFT', 'VK_RSHIFT', 'VK_LCONTROL', 'VK_RCONTROL', 
+      'VK_LMENU', 'VK_RMENU','VK_BROWSER_BACK', 'VK_BROWSER_FORWARD', 
+      'VK_BROWSER_REFRESH', 'VK_BROWSER_STOP','VK_BROWSER_SEARCH', 
+      'VK_BROWSER_FAVORITES', 'VK_BROWSER_HOME', 
+      'VK_VOLUME_MUTE','VK_VOLUME_DOWN', 'VK_VOLUME_UP', 'VK_MEDIA_NEXT_TRACK', 
+      'VK_MEDIA_PREV_TRACK','VK_MEDIA_STOP', 'VK_MEDIA_PLAY_PAUSE', 
+      'VK_LAUNCH_MAIL', 'VK_LAUNCH_MEDIA_SELECT','VK_LAUNCH_APP1', 
+      'VK_LAUNCH_APP2', 'VK_OEM_1', 'VK_OEM_PLUS', 
+      'VK_OEM_COMMA','VK_OEM_MINUS', 'VK_OEM_PERIOD', 'VK_OEM_2', 'VK_OEM_3', 
+      'VK_OEM_4', 'VK_OEM_5','VK_OEM_6', 'VK_OEM_7', 'VK_OEM_8', 'VK_OEM_102', 
+      'VK_PROCESSKEY', 'VK_PACKET', 'VK_ATTN', 'VK_CRSEL', 'VK_EXSEL', 
+      'VK_EREOF', 'VK_PLAY', 'VK_ZOOM', 'VK_NONAME','VK_PA1', 'VK_OEM_CLEAR' 
+</P>
+      <P><U>Пример использования:</U><BR><EM>_,_,x = 
+      string.find(hc.get_keyboard_state(), 'VK_F11')<BR>if x~=nil then ... 
+      end</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>systime_to_str</STRONG></TD>
+    <TD>
+      <P>Функция преобразует системное время в строковое представление.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>time</STRONG> -</EM> время по 
+      Гринвичу в числовом представлении;<BR><EM><STRONG>gmt</STRONG> -</EM> 
+      формат представления времени, принимает значения <EM>true</EM> или 
+      <EM>false</EM> (по умолчанию <EM>true</EM>). Если передано значение 
+      <EM>true</EM>, то на выходе функции время будет по Гринвичу. Если передано 
+      значение <EM>false</EM>, то локальное время.</P>
+      <P><U>Возвращаемое значение:</U> Время в строковом представлении.</P>
+      <P><U>Пример использования:</U><EM> s =                                             hc.systime_to_str(os.time(), 
+      false)</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>str_to_systime</STRONG></TD>
+    <TD>
+      <P>Функция преобразует строковое представление времени в числовое.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>str</STRONG>&nbsp;-</EM> время 
+      в формате, применяемом в http-заголовках;<BR><EM><STRONG>gmt</STRONG> 
+      -</EM> формат представления времени в первом аргументе, принимает значения 
+      <EM>true</EM> или <EM>false</EM> (по умолчанию <EM>true</EM>). Если 
+      передано значение <EM>true</EM>, то в первом аргументе должно находиться 
+      строковое представление&nbsp;времени&nbsp;по Гринвичу. Если передано 
+      значение <EM>false</EM>, то в первом аргументе должно находиться строковое 
+      представление локального&nbsp;времени.</P>
+      <P><U>Возращаемое значение:</U> Время по Гринвичу в числовом представлении 
+      (время в секундах, прошедшее после 0 часов 0 минут 1 января 1970 
+года).</P>
+      <P><U>Пример использования:</U><BR><EM>t1=hc.str_to_systime('Tue, 25 Nov 
+      2008 02:52:14 GMT')<BR>t2=os.time() -- Текущее время по Гринвичу в 
+      числовом представлении<BR>hc.put_to_log('C 25 ноября 2008 г. прошло 
+      '..(t2-t1)/3600/24..' дней')</EM> </P></TD></TR>
+  <TR>
+    <TD><STRONG>get_host_IP</STRONG></TD>
+    <TD>
+      <P>Функция получает IP-адрес для заданного имени сетевого узла.</P>
+      <P><U>Аргументы функции:</U><BR>
+      <EM><STRONG>host</STRONG>&nbsp;-</EM>&nbsp;имя сетевого узла;<BR>
+      <STRONG><EM>cache</EM></STRONG> - разрешение использования кэша 
+      DNS, принимает значения <EM>true</EM> или <EM>false</EM>; если этот 
+      аргумент опущен, то использование кэша разрешено.<BR>
+      <EM><STRONG>timeout</STRONG>&nbsp;-</EM>&nbsp;время, отведенное на выполнение функции;<BR>
+      </P>
+      <P><U>Возвращаемое значение:</U> <STRONG>Первым</STRONG> значением 
+      возвращается IP-адрес в виде строки; если IP-адрес не найден, то 
+      <STRONG>первое</STRONG> значение равно <EM>nil</EM>;
+      <STRONG>вторым</STRONG> значением функция возвращает строку - 
+      сообщение; в случае удачи сообщается был ли найден адрес в кэше; в случае 
+      неудачи - причина. Если истекло время на выполнение функции, функция 
+      возвращает значение <EM>-1</EM>.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;ip,e=hc.get_host_IP('handycache.ru')</EM></P></TD></TR>
+  <TR style="COLOR: ">
+    <TD><STRONG>ssl_handling_enabled</STRONG></TD>
+    <TD>
+      <P>Функция сообщает разрешена обработка SSL или нет.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>url</STRONG>&nbsp;-</EM>&nbsp;запрашиваемый 
+      URL;<BR><STRONG><EM>name</EM></STRONG> - имя пользователя, от которого 
+      поступил запрос.</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Если функция вызвана без аргументов, 
+      то&nbsp;она возвращает состояние опции Обработка SSL.&nbsp;Если значения 
+      аргументов заданы, то функция сообщает разрешена ли обработка SSL для 
+      данного URL и пользователя.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;en=hc.ssl_handling_enabled('https://mail.ru', 
+      'Boss')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>enable_user</STRONG></TD>
+    <TD>
+      <P>Функция позволяет разрешить или запретить пользователю доступ к 
+      HandyCache.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      пользователя;<BR><STRONG><EM>enable</EM>&nbsp;-</STRONG> разрешение 
+      пользователю с именем <EM><STRONG>name</STRONG></EM> доступа к HandyCache, 
+      принимает значения <EM>true</EM> или <EM>false</EM>; если этот аргумент 
+      пропущен, то эта функция не изменяет возможность доступа пользователя.</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;<EM>true</EM>, если пользователю 
+      разрешен доступ, и -&nbsp;<EM>false</EM>, если доступ запрещен;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;hc.enable_user('Boss', 
+      true)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_users_stat</STRONG></TD>
+    <TD>
+      <P>Функция позволяет получить информацию о пользователях.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>type</STRONG>&nbsp;-</EM>&nbsp;аргумент 
+      функции, от значения которого зависит характер возвращаемой инфлрмации; 
+      если этому аргументу присвоить значение '<EM>#all</EM>', то функция вернет 
+      таблицу, содержащую информацию о всех пользователях; если этому аргументу 
+      присвоить значение '<EM>#active</EM>', то функция вернет таблицу, 
+      содержащую информацию об активных пользователях (активными считаются 
+      пользователи, имеющие на данный момент хотя бы одно активное соединение с 
+      HandyCache); если этому аргументу присвоить имя пользователя, то функция 
+      вернет таблицу, содержащую информацию о заданном пользователе;&nbsp; если 
+      пользователя с заданным именем нет, то функция вернет <EM>nil;</EM> </P>
+      <P><U>Возвращаемое значение:</U> Таблица с информацией о пользователях; 
+      каждый элемент возвращаемой таблицы имеет следующие поля: 
+      '<EM>from_internet</EM>', '<EM>from_cache</EM>', '<EM>to_internet</EM>', 
+      '<EM>connections_number</EM>', '<EM>speed_limit</EM> ';</P>
+      <P><U>Пример использования:</U><BR><EM>local t= 
+      hc.get_users_stat('Иванов')<BR>if t then cn=t['Иванов'].connections_number 
+      end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>set_user_speed</STRONG></TD>
+    <TD>
+      <P>Функция позволяет задать ограничение скорости загрузки для 
+      пользователя.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      пользователя;<BR><STRONG><EM>speed</EM>&nbsp;-</STRONG> лимит скорости для 
+      пользователя с именем <STRONG><EM>name </EM></STRONG>в&nbsp;байтах в 
+      секунду; если этот аргумент равен нулю, то скорость загрузки&nbsp;не 
+      ограничена; если этот аргумент пропущен или он равен <EM>nil</EM> , то эта 
+      функция не изменяет лимит скорости загрузки пользователя.</P>
+      <P><U>Возвращаемое значение:</U> лимит скорости загрузки пользователя; 
+      если скорость загрузки пользователя не ограничена, то возвращается ноль; 
+      если пользователь с именем <EM><STRONG>name</STRONG></EM> не найден, то 
+      возвращается <EM>nil</EM>;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;hc.set_user_speed('Boss', 
+      0)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>prepare_path</STRONG></TD>
+    <TD>
+      <P>Функция создает каталоги в соответсвии с путем, заданным 
+аргументом.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>path</STRONG> -</EM> путь к 
+      папке;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> hc.prepare_path('c:\\program 
+      files\\handycache\\cache\\example\\')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_dir_files_list</STRONG></TD>
+    <TD>
+      <P>Функция позволяет получить список файлов у указанном каталоге.</P>
+      <P><U>Аргументы функции:
+      </U><BR><EM><STRONG>dir</STRONG>&nbsp;-</EM>&nbsp;путь к каталогу, для 
+      которого нужно получить список файлов</P>
+      <P><U>Возвращаемое значение:</U> Таблица со списком файлов, индекс таблицы от 0.</P>
+      <P><U>Пример использования:</U><BR><EM>
+      local t= hc.get_dir_files_list('d:\\tmp\\')<BR>
+      local i<BR>
+      for i=0, #t do<BR>
+      &nbsp;&nbsp;hc.put_to_log(t[i])<BR>
+      end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>repeat_options</STRONG></TD>
+    <TD>
+      <P>Функция задает опции, управляющие процессом получения данных от 
+      удаленного сервера.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>type</STRONG> 
+      -</EM>&nbsp;строка, может принимать значение <EM>'connect'</EM>, 
+      <EM>'request'</EM> или <EM>'no_answer'.</EM> 
+      <BR><EM><STRONG>time</STRONG>&nbsp;-</EM> если первому аргументу присвоено 
+      значение <EM>'connect'</EM>, то второй аргумент задает время на повторные 
+      соединения при ошибке в секундах; если первому аргументу присвоено 
+      значение <EM>'request'</EM>, то второй аргумент задает время на повторные 
+      запросы при ошибке в секундах; если первому аргументу присвоено значение 
+      <EM>'no_answer'</EM>, то второй аргумент задает время на повторные запросы 
+      без ответа в секундах; если втрому аргументу присвоен nil, то действует 
+      время, установленное в настройках на вкладке Управление 
+      загрузкой;<BR><EM><STRONG>pause</STRONG>&nbsp;-</EM> если первому 
+      аргументу присвоено значение <EM>'connect'</EM> , то&nbsp;третий аргумент 
+      задает паузу между попытками повторных соединений при ошибке в секундах; 
+      если первому аргументу присвоено значение <EM>'request'</EM>, то третий 
+      аргумент задает паузу между повторными попытками запросов при ошибке в 
+      секундах; если первому аргументу присвоено значение <EM>'no_answer'</EM>, 
+      то третий аргумент задает паузу между повторными попытками запросов без 
+      ответа в секундах; если третьему аргументу присвоен nil, то действует 
+      пауза, установленная в настройках на вкладке Управление загрузкой;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U> <EM>hc.repeat_options('connect', 30, 
+      3)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>call_me_for</STRONG></TD>
+    <TD>
+      <P>Функция регистрирует функцию текущего расширения в качестве обработчика 
+      события для текущего запроса.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>event</STRONG>&nbsp;-</EM> 
+      наименование события;<BR><EM><STRONG>function</STRONG>&nbsp;-</EM> имя 
+      функции текущего расширения;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> hc.call_me_for('BeforeAnswerBodySend', 
+      'body')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>client_disconnect</STRONG></TD>
+    <TD>
+      <P>Разрывает заданное соединение с клиентом.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>ind</STRONG>&nbsp;-</EM>&nbsp;номер 
+      соединения<EM>.</EM> Если аргумент не задан, то разрывается соединение, в 
+      котором работает расширение.</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> 
+      hc.client_disconnect(123)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>server_disconnect</STRONG></TD>
+    <TD>
+      <P>Разрывает соединение с сервером.</P>
+      <P><U>Аргументы функции:</U> Нет.</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> hc.server_disconnect()</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>user_disconnect</STRONG></TD>
+    <TD>
+      <P>Функция разрывает все установленные на данный момент соединения 
+      заданного пользователя.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      пользователя;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> 
+    hc.user_disconnect('Иванов')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>prepare_url</STRONG></TD>
+    <TD>
+      <P>Функция выполняет преобразование заданного URL в имя файла в кэше без 
+      вызова обработчика события URLToFileNameConverting.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>url</STRONG>&nbsp;-</EM>&nbsp;ссылка на 
+      сетевой ресурс;<BR><STRONG><EM>URLTransformingList</EM> -</STRONG> 
+      разрешение использования списка Преобразование URL при исполнении функции, 
+      принимает значения <EM>true</EM> или <EM>false</EM> (по умолчанию 
+      <EM>true</EM> ).<BR>
+      <STRONG><EM>DecodePunyCode</EM></STRONG> - 
+      управление&nbsp;декодированием&nbsp;puny-кода в URL, принимает значения 
+      <EM>true</EM> или <EM>false. </EM>Если этот аргумент не задан, то 
+      декодирование зависит от&nbsp;состояния опции Декодировать puny-код в 
+      URL.<BR>
+      <STRONG><EM>DecodeLocaleURL</EM></STRONG> - 
+      управление&nbsp;декодированием URL&nbsp;на язык локали, принимает значения 
+      <EM>true</EM> или <EM>false. </EM>Если этот аргумент не задан, то 
+      декодирование зависит от состояния опции Декодировать&nbsp;URL на язык 
+      локали Windows.</P>
+      <P><U>Возвращаемое значение:</U> Имя файла в кэше, полученное из заданного 
+      URL с помощью встроенного алгоритма преобразования;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;local s= 
+      hc.prepare_url(hc.url)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>preform_cache_file_name</STRONG></TD>
+    <TD>
+      <P>Функция задает имя файла в кэше, которое может быть сформировано 
+      расширением в обработчике события URLToFileNameConverting. HandyCache, 
+      если потребуется, может изменить заданное имя файла для его адаптации к 
+      текущему состоянию кэша. Путь к файлу может быть задан абсолютным 
+      (начинается с имени диска) или относительным. Во втором случае в начало 
+      имени добавляется путь к папке кэша.</P>
+      <P><EM>Замечание.</EM> По умолчанию HandyCache не использует файлы вне 
+      папки кэша. Чтобы разрешить использование файлов вне папки кэша, нужно в 
+      файл HandyCache.ini в секции MainForm добавить строку 
+      ReadOnlyFromCachePath=False</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>path</STRONG> -</EM> путь к 
+      файлу;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;hc.preform_cache_file_name('site1.ru\example.jpg')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_cache_file_name</STRONG></TD>
+    <TD>
+      <P>Функция получает имя файла в кэше и его наличие для заданного URL.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>url</STRONG>&nbsp;-</EM>&nbsp;ссылка на 
+      сетевой ресурс;</P>
+      <P><U>Возвращаемое значение:</U> <STRONG>Первым</STRONG> значением 
+      возвращается имя файла; <STRONG>вторым</STRONG> -&nbsp;наличие файла в 
+      кэше (<EM>true/false</EM> );</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;s,e=hc.get_cache_file_name('http://handycache.ru/')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_cache_file_size</STRONG></TD>
+    <TD>
+      <P>Функция получает&nbsp;размер файла в кэше.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;полное имя 
+      файла;</P>
+      <P><U>Возвращаемое значение:</U> Размер данных в файле за вычетом 
+      служебной информации, расположенной в конце файла; если файл не найден, 
+      возвращается значение -1.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;len=hc.get_cache_file_size('c:\cache\site.ru\img\qqq.jpg')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_cache_file_age</STRONG></TD>
+    <TD>
+      <P>Функция получает&nbsp;возраст файла в кэше.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;полное имя 
+      файла;</P>
+      <P><U>Возвращаемое значение:</U> Время в секундах, прощедшее с момента 
+      последнего&nbsp;изменения файла;</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;age=hc.get_cache_file_age('c:\cache\site.ru\img\qqq.jpg')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_cache_file_content_type</STRONG></TD>
+    <TD>
+      <P>Функция получает&nbsp;тип данных и способ кодирования данных 
+      в&nbsp;файле в кэше.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;полное имя 
+      файла;</P>
+      <P><U>Возвращаемое значение:</U> Первым значением возвращается строка, 
+      содержащая тип данных в файле в формате 
+      поля&nbsp;Content-Type&nbsp;http-заголовков;&nbsp;вторым 
+      значением&nbsp;возвращается строка, содержащая&nbsp;способ кодирования 
+      данных в файле в формате 
+      поля&nbsp;Content-Encoding&nbsp;http-заголовков;</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;type,encoding=hc.get_cache_file_content_type([[c:\cache\site.ru\img\qqq.jpg]])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>delete_cache_file</STRONG></TD>
+    <TD>
+      <P>Функция удаляет файл в кэше, соответствующий заданному URL.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>url</STRONG>&nbsp;-</EM>&nbsp;ссылка на 
+      сетевой ресурс;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;hc.delete_cache_file([[http://site.ru/example.gif]])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>delete_file</STRONG></TD>
+    <TD>
+      <P>Функция удаляет файл или каталог вместе с файлами, находящимися в 
+      указанном каталоге. В имени файла можно задавать маску с использованием 
+      символов '?' и&nbsp;'*'.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;путь 
+      к&nbsp;файлу или каталогу;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;hc.delete_file([[c:\cache\site.ru\*.gif]])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>file_last_modified_time</STRONG></TD>
+    <TD>
+      <P>Функция получает время последнего изменения файла.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>name</STRONG> -</EM> полное имя 
+      файла;<BR><EM><STRONG>gmt</STRONG> -</EM> формат представления времени, 
+      принимает значения <EM>true</EM> или <EM>false</EM> (по умолчанию 
+      <EM>false.</EM>) Если передано значение <EM>true</EM>, то на выходе 
+      функции время будет по Гринвичу. Если передано значение <EM>false</EM>, то 
+      на выходе функции будет локальное время.</P>
+      <P><U>Возвращаемое значение:</U> время последнего изменения файла в 
+      числовом представлении.</P>
+      <P><U>Пример использования:</U><BR><EM>local 
+      tm=hc.file_last_modified_time([[c:\autoexec.bat]])<BR>hc.put_to_log(hc.systime_to_str(tm))</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>update_url_info</STRONG></TD>
+    <TD>
+      <P>Функция удаляет информацию о заданном файле из RAM-кэша и очищает 
+      внутренние переменные HandyCache, хранящие информацию об этом файле. Если 
+      информация о файле понадобится, она будет добываться из дискового кэша 
+      заново.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>url</STRONG>&nbsp;-</EM>&nbsp;ссылка на 
+      сетевой ресурс;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;hc.update_url_info('http://handycache.ru/')</EM></P></TD></TR>
+  <TR></TR>
+  <TR>
+    <TD><STRONG>set_global</STRONG></TD>
+    <TD>
+      <P>Функция позволяет сохранить в памяти значение глобальной переменной. 
+      Сразу после завершения работы этой функции присвоенное значение будет 
+      доступно из других потоков.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя переменной, 
+      которой нужно присвоить значение&nbsp;<EM>value</EM>&nbsp;(если такой 
+      переменной нет, она будет 
+      создана);<BR><EM><STRONG>value</STRONG>&nbsp;-</EM> значение, которое 
+      нужно присвоить глобальной переменной (тип значения - любой доступный в 
+      <EM>lua</EM> кроме функции); если этот аргумент пропущен или <EM>nil</EM>, 
+      то переменная с именем <EM>name</EM> будет удалена из памяти;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> hc.set_global('MyVar', 
+      'Value')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_global</STRONG></TD>
+    <TD>
+      <P>Функция позволяет получить значение глобальной переменной.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя переменной, 
+      значение которой нужно получить;</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Значение переменной <EM>name.</EM> 
+      Если переменной с заданным именем нет, то возвращается <EM>nil.</EM></P>
+      <P><U>Пример использования:<BR></U><EM>local 
+      t1={}<BR>t1[1]=1<BR>t1['item1']='first item'<BR>local 
+      t2={}<BR>t2[1]=11<BR>t2[2]=22<BR>t2[3]=t1<BR>hc.set_global('var1', 
+      t2)<BR>local 
+      t=hc.get_global('var1')<BR>hc.put_to_log(t[3]['item1'])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>exists_global</STRONG></TD>
+    <TD>
+      <P>Функция позволяет&nbsp;выяснить имеется ли в памяти&nbsp;глобальная 
+      переменная.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      переменной,&nbsp;наличие в памяти&nbsp;которой нужно получить;</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Если переменная с заданным именем существует, то 
+      возвращается <EM>true</EM>, в противном случае - <EM>nil.</EM></P>
+      <P><U>Пример использования:</U> <EM>if 
+      hc.exists_global('var1') then a=hc.get_global('var1') end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>remove_global</STRONG></TD>
+    <TD>
+      <P>Функция позволяет&nbsp;удалить глобальную переменную.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      переменной,&nbsp;которую надо удалить;</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Нет<EM>.</EM></P>
+      <P><U>Пример использования:</U> <EM>if hc.exists_global('var1') then 
+      a=hc.remove_global('var1') end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>set_global_table_item</STRONG></TD>
+    <TD>
+      <P>Функция позволяет сохранить значение в глобальной таблице. Сразу после 
+      завершения работы этой функции присвоенное значение будет доступно из 
+      других потоков.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>table_name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      глобальной таблицы&nbsp;(если такой таблицы нет, она будет создана); если 
+      <EM>table_name -</EM> единственный аргумент функции, то таблица с этим 
+      именем будет 
+      удалена;<BR><EM><STRONG>index_list</STRONG>&nbsp;-</EM>&nbsp;список 
+      индексов&nbsp;элемента глобальной таблицы (если такого элемента таблицы 
+      нет, то он будет создан); список может быть произвольной длины, значения 
+      списка индексов могут принимать цифровые или строковые значения; например, 
+      если в списке два значения, то это означает, что в&nbsp;глобальную таблицу 
+      вложена другая таблица; первое значение списка индексов задает индекс в 
+      глобальной таблице, 
+      второй элемент списка индексов задает индекс элемента во вложенной 
+      таблице;<BR><EM><STRONG>value</STRONG>&nbsp;-</EM> значение, которое нужно 
+      присвоить элементу глобальной таблицы (тип значения - любой доступный в 
+      <EM>lua</EM> кроме функции); если этот аргумент пропущен или <EM>nil</EM>, 
+      то элемент таблицы с именем <EM>item_name</EM> будет удален из памяти;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM> hc.set_global_table_item('MyTable', 
+      'Index1',&nbsp;</EM><EM>'Index2',&nbsp;</EM><EM>'Value')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>get_global_table_item</STRONG></TD>
+    <TD>
+      <P>Функция позволяет получить значение элемента глобальной таблицы.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>table_name</STRONG>&nbsp;-</EM> &nbsp;имя 
+      глобальной таблицы;<BR><EM><STRONG>index_list</STRONG>&nbsp;-</EM>&nbsp;&nbsp;список 
+      индексов&nbsp;элемента глобальной таблицы; список может быть произвольной 
+      длины, значения списка индексов могут принимать цифровые или строковые 
+      значения; например, если в списке два значения, то это означает, что 
+      в&nbsp;глобальную таблицу вложена другая таблица; первое значение списка 
+      индексов задает индекс в глобальной таблице, второй элемент списка 
+      индексов задает индекс 
+      элемента во вложенной таблице;</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Значение&nbsp; элемента глобальной 
+      таблицы <EM>item_name.</EM> Если элемента глобальной таблицы с заданным 
+      именем нет, то возвращается <EM>nil.</EM></P>
+      <P><U>Пример использования:<BR></U><EM>local 
+      t1={}<BR>t1[1]=1<BR>t1['item1']='first item'<BR>local 
+      t2={}<BR>t2[1]=11<BR>t2[2]=22<BR>t2[3]=t1<BR>hc.set_global('var1', 
+      t2)<BR>local t= 
+      hc.get_global_table_item('var1',3)<BR>hc.put_to_log(t['item1'])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>exists_global_table_item</STRONG></TD>
+    <TD>
+      <P>Функция позволяет&nbsp;выяснить имеется ли в памяти&nbsp;значение 
+      элемента глобальной таблицы.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>table_name</STRONG>&nbsp;-</EM> &nbsp;имя 
+      глобальной таблицы;<BR><EM><STRONG>index_list</STRONG>&nbsp;-</EM>&nbsp;&nbsp;список 
+      индексов&nbsp;элемента глобальной таблицы; список может быть произвольной 
+      длины, значения списка индексов могут принимать цифровые или строковые 
+      значения; например, если в списке два значения, то это означает, что 
+      в&nbsp;глобальную таблицу вложена другая таблица; первое значение списка 
+      индексов задает индекс в глобальной таблице, второй элемент списка 
+      индексов задает индекс элемента 
+      во вложенной таблице;</P>
+      <P><U>Возвращаемое значение:</U>&nbsp;Если значение 
+      элемента&nbsp;глобальной таблицы&nbsp;с заданным именем существует, то 
+      возвращается <EM>true</EM>, в противном случае - <EM>nil.</EM></P>
+      <P><U>Пример использования:</U> 
+      <EM>if hc.exists_global_table_item('var1',3,'a') then 
+      a=hc.get_global_table_item('var1',3</EM><EM>,'a'</EM><EM>) 
+  end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>remove_global_table_item</STRONG></TD>
+    <TD>
+      <P>    Функция позволяет&nbsp;удалить 
+      элемент глобальной таблицы.</P>
+      <P><U>Аргументы 
+      функции:<BR></U><EM><STRONG>table_name</STRONG>&nbsp;-</EM> &nbsp;имя 
+      глобальной таблицы;<BR><EM><STRONG>index_list</STRONG>&nbsp;-</EM>&nbsp;&nbsp;список 
+      индексов&nbsp;элемента глобальной таблицы; список может быть произвольной 
+      длины, значения списка индексов могут принимать цифровые или строковые 
+      значения; например, если в списке два значения, то это означает, что 
+      в&nbsp;глобальную таблицу вложена другая таблица; первое значение списка 
+      индексов задает индекс в глобальной таблице, второй элемент списка 
+      индексов задает индекс элемента 
+      во вложенной таблице;</P>
+      <P><U>Возвращаемое значение:</U>    &nbsp;Нет <EM>.</EM></P>
+      <P><U>Пример использования:</U> 
+      <EM>if hc.exists_global_table_item('var1',3,'a') then 
+      a=hc.remove_global_table_item('var1',3</EM><EM>,'a'</EM><EM>) 
+    end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>window_pos</STRONG></TD>
+    <TD>
+      <P>Функция получает положение и размер главного окна HandyCache.</P><U>
+      <P><U>Аргументы функции:</U> Нет.</P></U>
+      <P><U>Возвращаемое значение:</U> <STRONG>Первым</STRONG> значением 
+      возвращается горизонтальная координата верхнего левого угла окна; 
+      <STRONG>вторым</STRONG> <STRONG>-</STRONG>&nbsp;вертикальная координата 
+      верхнего левого угла окна; <STRONG>третьим</STRONG> - ширина окна; 
+      <STRONG>четвертым</STRONG> - высота окна;</P>
+      <P><U>Пример 
+    использования:</U><EM>&nbsp;x,y,w,h=hc.window_pos()</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>enable_extension</STRONG></TD>
+    <TD>
+      <P>Функция позволяет разрешать или запрещать работу расширения с заданным 
+      именем.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      расширения;<BR><EM><STRONG>enable</STRONG>&nbsp;-</EM>&nbsp;флаг, 
+      разрешающий или запрещающий работу расширения (<EM>true/false</EM>); если 
+      этот аргумент опущен, функция не меняет текущее состояние флага;</P>
+      <P><U>Возвращаемое значение:</U> Текущее состояние разрешения работы 
+      расширения (<EM>true/false.</EM>)</P>
+      <P><U>Пример использования:</U><EM> hc.enable_extension('Cache cleaner', 
+      true)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>reload_extension</STRONG></TD>
+    <TD>
+      <P>Функция заставляет HandyCache перечитать файл расширения с заданным 
+      именем с последущим вызовом обработчика события Init.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      расширения;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример использования:</U><EM>&nbsp;hc.reload_extension('Cache 
+      cleaner')</EM></P></TD></TR></TBODY></TABLE>
+<P></P>
+<H3 align=center>&nbsp;</H3>
+<P align=left>Для выполнения регулярных выражений в HandyCache и расширениях 
+используется библиотека PCRE.</P>
+<P align=center>PCRE License</P><PRE>PCRE is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
+
+                       Written by Philip Hazel
+           Copyright (c) 1997-2009 University of Cambridge
+
+-----------------------------------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</PRE>
+<P></P>
+<H3 align=center><FONT face=Arial>Переменные таблицы re, доступные в 
+расширениях</FONT></H3>
+<TABLE border=1 cellSpacing=2>
+  <TBODY>
+  <TR>
+    <TD align=center>
+      <P><B>Имя</B></P></TD>
+    <TD align=center><STRONG>Допустимые действия</STRONG></TD>
+    <TD align=center>
+      <P><B>События</B></P></TD>
+    <TD align=center>
+      <P><B>Допустимые значения</B></P></TD>
+    <TD align=center>
+      <P><B>Описание</B></P></TD></TR>
+  <TR>
+    <TD><STRONG>engine</STRONG></TD>
+    <TD>чтение, запись</TD>
+    <TD>Все события</TD>
+    <TD>1..20</TD>
+    <TD>
+      <P>Расширения могут использовать до двадцати движков, исполняющих 
+      регулярные выражения. Значение <EM>engine</EM> позволяет выбрать для 
+      использования один из этих движков. Как правило, для выполнения своей 
+      работы расширению достаточно одного движка. Если не присвоить значение 
+      этой переменной, то по умолчанию будет использоваться первый движок. 
+      Однако, если, например, в callout-функции требуется выполнить регулярное 
+      выражение, то использовать для этой цели первый движок уже нельзя, это 
+      вызовет нарушение работы первого движка после выхода из callout-функции. 
+      Для использования в callout-функции нужно использовать другой движок. В 
+      callout-функции следует перед выполнением регулярных выражений включить 
+      другой движок присвоив переменной <EM>engine</EM> значение отличное от 
+      единицы, а потом вернуть расширение к использованию первого движка.</P>
+      <P>Прочитав значение этой переменной расширение может узнать номер 
+      текущего движка.</P></TD></TR>
+   <TR>
+    <TD><STRONG>info_options</STRONG></TD>
+    <TD>Чтение</TD>
+    <TD>Все события</TD>
+    <TD>&nbsp;</TD>
+    <TD>
+      <P>Получает&nbsp;опции, с которыми было скомпилировано,&nbsp;регулярное 
+      выражение.</P>
+      <P> Опции, с которыми было скомпилировано, 
+      регулярное выражение. Значения опций представлены битовой 
+      маской:<BR>PCRE_CASELESS&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000001<BR>PCRE_MULTILINE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00000002<BR>PCRE_DOTALL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000004<BR>PCRE_EXTENDED&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000008<BR>PCRE_ANCHORED&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000010<BR>PCRE_DOLLAR_ENDONLY&nbsp; &nbsp;&nbsp; 
+      0x00000020<BR>PCRE_EXTRA&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00000040<BR>PCRE_NOTBOL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000080<BR>PCRE_NOTEOL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000100<BR>PCRE_UNGREEDY&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000200<BR>PCRE_NOTEMPTY&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00000400<BR>PCRE_UTF8&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+      &nbsp;&nbsp; 0x00000800<BR>PCRE_NO_AUTO_CAPTURE&nbsp; &nbsp; 
+      0x00001000<BR>PCRE_NO_UTF8_CHECK&nbsp; &nbsp; &nbsp; 
+      0x00002000<BR>PCRE_AUTO_CALLOUT&nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00004000<BR>PCRE_PARTIAL_SOFT&nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00008000<BR>PCRE_DFA_SHORTEST&nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00010000<BR>PCRE_DFA_RESTART&nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00020000<BR>PCRE_FIRSTLINE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00040000<BR>PCRE_DUPNAMES&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00080000<BR>PCRE_NEWLINE_CR&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00100000<BR>PCRE_NEWLINE_LF&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00200000<BR>PCRE_NEWLINE_CRLF&nbsp; &nbsp; &nbsp;&nbsp; 
+      0x00300000<BR>PCRE_NEWLINE_ANY&nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00400000<BR>PCRE_NEWLINE_ANYCRLF&nbsp; &nbsp; 
+      0x00500000<BR>PCRE_BSR_ANYCRLF&nbsp; &nbsp; &nbsp; &nbsp; 
+      0x00800000<BR>PCRE_BSR_UNICODE&nbsp; &nbsp; &nbsp; &nbsp; 
+      0x01000000<BR>PCRE_JAVASCRIPT_COMPAT&nbsp; 
+      0x02000000<BR>PCRE_NO_START_OPTIMIZE&nbsp; 
+      0x04000000<BR>PCRE_PARTIAL_HARD&nbsp; &nbsp; &nbsp;&nbsp; 
+      0x08000000<BR>PCRE_NOTEMPTY_ATSTART&nbsp;&nbsp; 
+      0x10000000<BR>PCRE_UCP&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+      &nbsp; 0x20000000</P>
+      <P><U>Пример использования:</U><EM> local opt=                   
+    re.info_options</EM></P></TD>
+</TR>
+   <TR>
+    <TD><STRONG>info_maxlookbehind</STRONG></TD>
+    <TD>Чтение</TD>
+    <TD>Все события</TD>
+    <TD>&nbsp;</TD>
+    <TD>
+      <P>Выдает количество символов в самом длинном lookbehind assertion 
+      последнего регулярного выражения. Эта информация полезна при организации 
+      поиска по регулярному выражению в условиях неполноты (поступления по 
+      частям) анализируемой строки.</P>
+      <P><U>Пример использования:</U><EM> local max_len= 
+      re.info_maxlookbehind</EM></P></TD>
+</TR>
+   <TR>
+    <TD><STRONG>info_jit</STRONG></TD>
+    <TD>Чтение</TD>
+    <TD>Все события</TD>
+    <TD>&nbsp;</TD>
+    <TD>
+      <P>Получает значение&nbsp;1, если регулярное выражение было скомпилировано 
+      с опцией PCRE_STUDY_JIT_COMPILE и jit-компиляция завершилась успешно. 
+      Возвращает 0, если использовние jit по каким-то причинам оказалось 
+      невозможным.</P>
+      <P><U>Пример использования:</U><EM> local jit=                   
+  re.info_jit</EM></P></TD>
+</TR>
+</TBODY>
+</TABLE>
+<PRE></PRE><PRE><H3 align=center><FONT size=2 face=Arial><FONT size=4>Функции таблицы re для работы с регулярными выражениями</FONT></FONT></H3></PRE>
+<P align=left>
+<TABLE border=1 cellSpacing=2>
+  <TBODY>
+  <TR>
+    <TD>
+      <P align=center><STRONG>Имя</STRONG></P></TD>
+    <TD>
+      <P align=center><STRONG>Описание</STRONG></P></TD></TR>
+  <TR>
+    <TD><STRONG>select_engine</STRONG></TD>
+    <TD>
+      <P>Эта функция делает то же действие, что и присвоение значения 
+      переменной&nbsp;<EM>engine </EM>(функция оставлена для сохранения 
+      совместимости со старыми версия расширений). C помощью этой функции можно 
+      выбрать какой из имеющихся движков будет использоваться.</P>
+      <P><U>Аргументы функции:</U><BR><EM><STRONG>num</STRONG>&nbsp;-</EM> 
+      &nbsp;номер движка, может принимать значения от 1 до&nbsp;20;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:<BR></U><EM>re.select_engine(2)<BR>s=re.replace(hc.answer_header, 
+      [[(?-s)(Cache-Control:.*\r\n)]],nil)<BR>re.select_engine(1)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>set_regex</STRONG></TD>
+    <TD>
+      <P>Задает регулярное выражение.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>regex</STRONG>&nbsp;-</EM>&nbsp;регулярное 
+      выражение;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;re.set_regex([[(.*\.).*]])</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>set_subj</STRONG></TD>
+    <TD>
+      <P>Задает строку, над которой буде исполняться регулярное выражение.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>subj</STRONG>&nbsp;-</EM>&nbsp;строка;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;re.set_subj(hc.answer_header)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>set_callout</STRONG></TD>
+    <TD>
+      <P>Задает имя callout-функции.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>func</STRONG>&nbsp;-</EM>&nbsp;имя 
+      callout-функции;</P>
+      <P><U>Возвращаемое значение:</U> Нет.</P>
+      <P><U>Пример 
+      использования:</U><EM>&nbsp;re.set_callout('callout_func')</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>match</STRONG></TD>
+    <TD>
+      <P>Вызывает исполнение регулярного выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>subj</STRONG>&nbsp;-</EM>&nbsp;строка, над 
+      которой будет исполняться регулярное выражение; если на месте этого 
+      аргумента задан <EM>nil </EM>или этот аргумент опущен, то будет 
+      использоваться subj-строка, заданная предыдущей 
+      функцией.<BR><EM><STRONG>regex</STRONG> -</EM> регулярное выражение; если 
+      на месте этого аргумента задан <EM>nil </EM>или этот аргумент опущен, то 
+      будет использоваться регулярное выражение, заданное предыдущей 
+      функцией;<BR><EM><STRONG>offset</STRONG> -</EM> смещение позиции в 
+      <EM>subj</EM>-строке, с которой начнется исполнение регулярного выражения; 
+      если на месте этого аргумента задан <EM>nil </EM>или этот аргумент опущен, 
+      то исполнение регулярного выражения начнется с начала строки (1-й 
+      позиции);<BR><EM><STRONG>partial</STRONG> -</EM> флаг, разрешающий 
+      использовать частичное совпадение; может принимать 
+      значение&nbsp;<EM>'soft'</EM> или <EM>'hard'</EM>;&nbsp;для совместимости 
+      со старыми версиями может принимать значение <EM>true </EM>(равносильно 
+      значению <EM>'soft'</EM> ); если на месте этого аргумента задан <EM>nil 
+      </EM>или этот аргумент опущен, то частичные совпадения не 
+используются;</P>
+      <P><U>Возвращаемое значение:</U> Если в результате исполнения регулярного 
+      выражения найдена хотя бы одна подстрока, то <STRONG>первым</STRONG> 
+      значением функция возвращает таблицу;&nbsp;в&nbsp;таблице будет ровно 
+      столько элементов, сколько нужно для размещения значений для всех 
+      найденных подстрок (например, если номер последней найденной подстроки 
+      равен два, то в таблице будет три элемента с индексами 0, 1 и 2);&nbsp;в 
+      этой таблице для каждой&nbsp;подстроки находится по паре значений: 
+      begin_pos и end_pos; эти значения задают соответственно позиции в 
+      <EM>subj</EM>-строке для начала и конца каждой&nbsp;подстроки; 
+      если&nbsp;подстрока не была найдена, то для нее будут записаны значения 
+      begin_pos и end_pos равные <EM>-1</EM>;&nbsp;&nbsp;если в результате 
+      исполнения регулярного выражения не найдено ни одной подстроки, то 
+      <STRONG>первому</STRONG> возвращаемому значению присваивается 
+      <EM>nil</EM>, а в качестве <STRONG>второго</STRONG> значения возвращается 
+      строка с описанием ошибки; в качестве <STRONG>третьего</STRONG> значения 
+      функции всегда выводится значение (*Mark).</P>
+      <P><U>Пример использования:<BR></U><EM>local t=re.match(s, regex)<BR>if t 
+      then hc.put_to_log('длина подстроки='..t[0].end_pos-t[0].begin_pos+1) 
+      end</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>substr_count</STRONG></TD>
+    <TD>
+      <P>Получает&nbsp;номер последней подстроки, найденной в результате 
+      последнего исполнения регулярного выражения.</P>
+      <P><U>Аргументы функции:</U> Нет.</P>
+      <P><U>Возвращаемое значение:</U> Номер последней найденной подстроки.</P>
+      <P><U>Пример использования:</U><EM> local num=                                             
+    re.substr_count()</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>substr</STRONG></TD>
+    <TD>
+      <P>Получает подстроку с заданным номером, найденную в результате 
+      последнего исполнения регулярного выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>num</STRONG>&nbsp;-</EM>&nbsp;номер подстроки 
+      (счет начинается с 0);</P>
+      <P><U>Возвращаемое значение:</U> Возвращается подстрока; если подстрока с 
+      заданным номером не найдена, то возвращается&nbsp;пустая строка;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;local 
+  s=re.substr(0)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>substr_length</STRONG></TD>
+    <TD>
+      <P>Получает длину подстроки с заданным номером, найденной в результате 
+      последнего исполнения регулярного выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>num</STRONG>&nbsp;-</EM>&nbsp;номер 
+      подстроки;</P>
+      <P><U>Возвращаемое значение:</U> Возвращается длина подстроки; если 
+      подстроки с заданным номером нет, то возвращается значение меньше 
+      единицы&nbsp;;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;local 
+      l=re.substr_length(0)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>substr_offset</STRONG></TD>
+    <TD>
+      <P>Получает смещение позиции начала подстроки с заданным номером в 
+      <EM>subj</EM>-строке, найденной в результате последнего исполнения 
+      регулярного выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>num</STRONG>&nbsp;-</EM>&nbsp;номер 
+      подстроки;</P>
+      <P><U>Возвращаемое значение:</U> Возвращается смещение подстроки; если 
+      подстроки с заданным номером нет, то возвращается&nbsp;значение меньше 
+      единицы&nbsp;(символы в lua-строке нумеруются начиная с <EM>1</EM>, 
+      поэтому&nbsp;значение меньше единицы&nbsp;можно использовать как признак 
+      того, что данная подстрока не была найдена); </P>
+      <P><U>Пример использования:</U><EM>&nbsp;local 
+      offset=re.substr_offset(0)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>named_substr_index</STRONG></TD>
+    <TD>
+      <P>Получает индекс именованной подстроки, найденной в результате 
+      последнего исполнения регулярного выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>name</STRONG>&nbsp;-</EM>&nbsp;имя 
+      подстроки;</P>
+      <P><U>Возвращаемое значение:</U> Возвращается индекс подстроки с заданным 
+      именем; если подстроки с заданным именем нет, то возвращается 
+      <EM>-1;</EM></P>
+      <P><U>Пример использования:<BR></U><EM>t= re.match(s, 
+      'a(?&lt;name&gt;b)')<BR>i=re.named_substr_index('name')<BR>if i&gt;0 then l=   
+       t[i].end_pos-t[i].begin_pos</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>offsets_vector_size</STRONG></TD>
+    <TD>
+      <P>Получает размер вектора (массива) результатов выполнения регулярного 
+      выражения.</P>
+      <P><U>Аргументы функции:</U> Нет.</P>
+      <P><U>Возвращаемое значение:</U> Возвращается размер массива 
+      результатов;</P>
+      <P><U>Пример использования:</U><EM>&nbsp;local 
+      n=re.offsets_vector_size()</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>offsets_vector</STRONG></TD>
+    <TD>
+      <P>Получает элемент вектора (массива) результатов выполнения регулярного 
+      выражения.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>index</STRONG>&nbsp;-</EM>&nbsp;номер элемента 
+      массива;</P>
+      <P><U>Возвращаемое значение:</U> Возвращается элемент массива результатов, 
+      обычно это смещение от начала строки, с которой работает регулярное 
+      выражение; если элемента с заданным номером нет, то возвращается 
+      <EM>-1;</EM></P>
+      <P><U>Пример использования:</U><EM>&nbsp;local 
+      offset=re.offsets_vector(0)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>find</STRONG></TD>
+    <TD>
+      <P>Получает значение заданной подстроки.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>subj</STRONG>&nbsp;-</EM>&nbsp;строка, над 
+      которой будет исполняться регулярное выражение; если на месте этого 
+      аргумента задан <EM>nil </EM>или этот аргумент опущен, то будет 
+      использоваться строка, заданная предыдущей 
+      функцией.<BR><EM><STRONG>regex</STRONG> -</EM> регулярное выражение; если 
+      на месте этого аргумента задан <EM>nil </EM>или этот аргумент опущен, то 
+      будет использоваться регулярное выражение, заданное предыдущей 
+      функцией;<BR><EM><STRONG>num</STRONG> -</EM> &nbsp;номер искомой 
+      подстроки; если на месте этого аргумента задан <EM>nil </EM>или этот 
+      аргумент опущен, то ищется подстрока с номером 
+      0;<BR><EM><STRONG>partial</STRONG> -</EM> флаг, разрешающий использовать 
+      частичное совпадение; может принимать значение <EM>'soft'</EM> или 
+      <EM>'hard'</EM>; для совместимости со старыми версиями может принимать 
+      значение <EM>true</EM>(равносильно значению <EM>'soft'</EM>); если на 
+      месте этого аргумента задан <EM>nil </EM>или этот аргумент опущен, то 
+      частичные совпадения не используются;</P>
+      <P><U>Возвращаемое значение:</U> Если в результате исполнения регулярного 
+      выражения найдена подстрока с заданным номером, то <STRONG>первым</STRONG> 
+      значением функция возвращает эту подстроку; если не найдена заданная 
+      подстрока, то <STRONG>первому</STRONG> возвращаемому значению 
+      присваивается <EM>nil;</EM>&nbsp;если при исполнении регулярного выражения 
+      не было обнаружено ошибок, то <STRONG>вторым</STRONG> значением функции 
+      будет <EM>nil</EM>;&nbsp;если при исполнении регулярного выражения 
+      произошла ошибка, то в качестве <STRONG>второго</STRONG> значения 
+      возвращается строка с описанием ошибки; в качестве 
+      <STRONG>третьего</STRONG> значения функции выводится значение (*Mark).</P>
+      <P><U>Пример использования:</U><EM>&nbsp;local s=re.find(hc.answer_header, 
+      [[^Content-Length: (.+)]], 1)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>replace</STRONG></TD>
+    <TD>
+      <P>Заменяет в строке найденные подстроки заданным значением.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>subj</STRONG>&nbsp;-</EM>&nbsp;строка, над 
+      которой будет исполняться регулярное выражение и в которой будут 
+      заменяться найденные подстроки; если на месте этого аргумента задан 
+      <EM>nil </EM>или этот аргумент опущен, то будет использоваться 
+      subj-строка, заданная предыдущей функцией.<BR><EM><STRONG>regex</STRONG> 
+      -</EM> регулярное выражение; если на месте этого аргумента задан <EM>nil 
+      </EM>или этот аргумент опущен, то будет использоваться регулярное 
+      выражение, заданное вызовом предыдущей 
+      функцией;<BR><EM><STRONG>repl</STRONG> &nbsp;-</EM> строка, которой будут 
+      заменяться найденные подстроки; если на месте этого аргумента задан 
+      <EM>nil </EM>или этот аргумент опущен, то найденные подстроки будут 
+      заменяться пустой строкой (удаляться);<BR><EM><STRONG>all</STRONG> -</EM> 
+      флаг, указывающий, что применение регулярного выражения и выполнение 
+      замены должно производиться повторно пока будет обнаруживаться совпадение 
+      (<EM>true/false</EM> ); если на месте этого аргумента задан <EM>nil 
+      </EM>или этот аргумент опущен, то применение регулярного выражения и 
+      выполнение замены производится однократно (значение <EM>false</EM> 
+      );<BR><EM><STRONG>partial</STRONG> -</EM> флаг, разрешающий использовать 
+      частичное совпадение; может принимать значение <EM>'soft'</EM> или 
+      <EM>'hard';</EM> для совместимости со старыми версиями может принимать 
+      значение <EM>true </EM>(равносильно значению <EM>'soft'</EM>); если на 
+      месте этого аргумента задан <EM>nil </EM>или этот аргумент опущен, то 
+      частичные совпадения не используются;</P>
+      <P><U>Возвращаемое значение:</U> Если при исполнении регулярного выражения 
+      не было ошибок (даже если не найдено ни одной подстроки), то 
+      <STRONG>первым</STRONG> значением функция возвращает строку - результат 
+      обработки (в противном случае <EM>nil</EM>);&nbsp;<STRONG>вторым</STRONG> 
+      значением возвращается число произведенных замен; <STRONG>третьим</STRONG> 
+      значением функция возвращает позицию в результирующей строке, с которой 
+      начинается неизмененная часть; если в результате исполнения регулярного 
+      выражения произошла ошибка, то <STRONG>четвертым</STRONG> значением 
+      возвращается строка с описанием ошибки.</P>
+      <P><U>Пример использования:</U><EM>&nbsp;s=re.replace(hc.answer_header, 
+      [[(?-s)(Cache-Control:.*\r\n)]], nil)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>register_regex</STRONG></TD>
+    <TD>
+      <P>Регистрирует регулярное выражение.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>regex</STRONG>&nbsp;-</EM>&nbsp;регулярное 
+      выражение, заданное в этом аргументе, компилируется и результат компиляции 
+      сохраняется во внутреннем кэше регулярных выражений HandyCache;</P>
+      <P><U>Возвращаемое значение:</U> 
+      Возвращается идентификатор зарегистрированного регулярного выражения. В 
+      дальнейшем расширения могут использовать этот идентификатор при&nbsp;вызове 
+      функций&nbsp;в качестве аргумента вместо самого регулярного выражения; </P>
+      <P><U>Пример использования:</U><BR><EM>local reg_id=re.register_regex([[(?-s)(Cache-Control:.*\r\n)]])<BR>
+       s=re.replace(hc.answer_header, reg_id, nil)</EM></P></TD></TR>
+  <TR>
+    <TD><STRONG>registered_regex</STRONG></TD>
+    <TD>
+      <P>Проверяет заегистрировано&nbsp;регулярное выражение 
+      с заданным идентификатором&nbsp;или нет.</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>reg_id</STRONG>&nbsp;-</EM> 
+               
+          &nbsp;идентификатор регулярного выражения;</P>
+      <P><U>Возвращаемое значение:</U> 
+            
+          true, если регулярное 
+      выражение с заданным идентификатором есть в кэше; </P>
+      <P><U>Пример использования:</U><BR><EM>local reg=[[(?-s)(Cache-Control:.*\r\n)]]<BR>
+      if not 
+      re.registered_regex(reg_id)
+      then reg_id= re.register_regex(reg) end</EM></P>
+  <TR>
+    <TD><STRONG>unregister_regex</STRONG></TD>
+    <TD>
+      <P>Удаляет из кэша&nbsp;регулярное выражение с заданным идентификатором (освобождает память).</P>
+      <P><U>Аргументы 
+      функции:</U><BR><EM><STRONG>reg_id</STRONG>&nbsp;-</EM>     
+       &nbsp;идентификатор регулярного выражения;</P>
+      <P><U>Возвращаемое значение:</U>  
+          Нет.</P>
+      <P><U>Пример использования:</U>&nbsp;<EM> 
+       re.unregister_regex(reg_id)</EM></P></TD></TR></TBODY></TABLE></P>
+<H3 align=center>Хранение данных, используемых расширениями</H3>
+<P>Для исполнения обработчиков событий в каждом потоке-обработчике соединения с 
+клиентом создается своя <EM>lua</EM>-машина. Глобальные переменные, создаваемые 
+обработчиками в <EM>lua</EM> -машине доступны для всех обработчиков, которые 
+будут вызваны позднее в этом потоке.</P>
+<P>При загрузке каждого расширения в HandyCache создается пустая таблица 
+<EM>hc_static</EM>, привязанная к этому расширению. Следом для каждого 
+расширения вызывается обработчик <EM>Init</EM> (если таковой зарегистрирован). 
+Он может сохранить значения в таблице <EM>hc_static</EM> и они будут доступны во 
+всех обработчиках этого расширения при обработке всех последующих запросов. 
+Также обработчик <EM>Options</EM> (вызывается нажатием кнопки <EM>Настройки 
+расширения</EM> на вкладке <EM>Расширения</EM> ) может изменить значения в этой 
+таблице (или добавить новые) и они будут доступны при обработке всех последующих 
+запросов.</P>
+<P>Когда создается поток-обработчик запроса клиента, в нем создается копия 
+таблицы <EM>hc_static</EM> для каждого расширения и внутри потока работа идет 
+уже с этой копией. Обработчики событий могут добавлять/изменять переменные, но 
+доступны эти значения будут только внутри этого потока.</P>
+<P>Обработчики событий при необходимости могут сохранять значения в глобальных 
+переменных. Значения, сохраненные в глобальных переменных, с момента присвоения 
+и до завершения работы программы становятся доступны из всех обработчиков всех 
+потоков. Для доступа к глобальным переменным используются функции 
+<EM>hc.set_global</EM> и <EM>hc.get_global.</EM></P>
+<H3 align=center>Графический интерфейс пользователя</H3>
+<P>Расширения HandyCache как и другие программы на <EM>lua</EM> могут 
+использовать графический интерфейс пользователя. Вот несколько примеров 
+предназначенных для таких целей библиотек: <A 
+href="http://wxlua.sourceforge.net/">wxlua</A>, <A 
+href="http://luaforge.net/projects/luainterface">LuaInterface</A>, <A 
+href="http://vclua.luaforge.net/">VCLua</A>. Мне наиболее подходящей для 
+расширений HandyCache показалась библиотека VCLua (сравнительно просто 
+использовать, малый размер dll). Пример использования этой библиотеки в 
+обработчике события <EM>Options</EM> можно найти в расширении 
+<EM>eCacheCleaner</EM> (для использования этой библиотеки в папке HandyCache 
+должен находиться файл <EM>vcl.dll</EM>).</P>
+<H3 align=center>Тестирование расширений</H3>
+<P>В файле <EM>LuaTest.exe</EM> находится программа для тестирования работы 
+расширений. Для тестирования расширения загрузите его в эту программу и нажмите 
+кнопку <EM>Перечитать.</EM> В появившемся ниже списке обработчиков событий 
+выберите интерисующий и нажмите кнопку <EM>Выполнить (F5)</EM> для вызова 
+выделенной функции-обработчика. Чтобы выполнить функцию, отсутствующую в списке, 
+впишите ее имя в поле ввода рядом с кнопкой <EM>Выполнить</EM> и нажмите эту 
+кнопку.</P>
+<P>Информацию о языке <EM>lua</EM> можно найти, например, здесь: <NOINDEX><A 
+href="http://www.lua.org/manual/5.1/" rel=nofollow>по-английски</A> или <A 
+href="http://www.lua.ru/doc/" rel=nofollow>по-русски</A>.</P></BODY></HTML>
