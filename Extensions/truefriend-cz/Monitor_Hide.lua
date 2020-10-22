@@ -9,7 +9,7 @@
 </HCExtension> ]]
 
 function BeforeViewInMonitor()
-	if re.match(hc.url, [[.*(oneoneoneone|:443|:1001|:5228|chat|/search|min.js|BlueBox|app.standsapp.org|newtab|blogID|chrome-sync/command|api/stats/qoe|gen_204|osname|chrome-cache-killer-defaults).*]]) then
+	if re.match(hc.url, [[.*(oneoneoneone|:443|:1001|:5228|:9614|chat|detectportal.firefox.com|accounts.firefox.com|services.mozilla.com|api.accounts.firefox.com|/search|min.js|BlueBox|app.standsapp.org|newtab|blogID|chrome-sync/command|api/stats/qoe|gen_204|osname|chrome-cache-killer-defaults).*]]) then
 		hc.hide_in_active_list = true
 		hc.hide_in_monitor = true
 	end

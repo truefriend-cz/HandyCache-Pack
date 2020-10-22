@@ -55,6 +55,8 @@ function _CM_READ_FILE(fname, ErrMessage)
 end
 
 function _CM_WRITE_FILE(fname, mode, ...)
+	local path = fname:match('^.*\\')
+	if path then hc.prepare_path(path) end
 	local f, err = io.open(fname, mode)
 	if f then
 		f:write(...)
@@ -102,10 +104,8 @@ _CM_FILTER_CODES = {
 	M = 'AdBlockPlus: Remove elements by URL',
 	A = 'AdBlockPlus: Element hiding',
 	N = 'AdBlockPlus: Do not track',
-	B = 'HandyCache: Remove elements by URL',
-	H = 'HandyCache: Block retrieval of URL',
-	W = 'HandyCache: Use White list',
 }
+
 
 function PREPARE_CM_RESPONSE_HEADER(answer_header)	-- оформл€ет ответ клиенту с учетом различных требований HTTP
 	local request_header = hc.request_header
@@ -119,6 +119,7 @@ function PREPARE_CM_RESPONSE_HEADER(answer_header)	-- оформл€ет ответ клиенту с 
 	return answer_header
 end
 
+
 function _CM_UNQOUTIFY(str, quote)
 	-- replaced_fragment = re.replace(replaced_fragment, [[~=~=~\K~=~=~[!@](.*?)~=~=~]], [[ + \1]], true)
 	-- replaced_fragment = re.replace(replaced_fragment, [[~=~=~@(.*?)~=~=~]], [[" + \1]], true)	-- пробел между знаком "плюс" не убирать, т.к. возможна€ конструкци€ с унарным "плюсом": A + +B
@@ -131,8 +132,9 @@ function _CM_UNQOUTIFY(str, quote)
 	return str
 end
 
+
 function _CM_TO_LOG(fragment, replacement, RuleCode, IsException, RuleType, quotified)
--- if not fragment then hc.put_to_log(tostring(RuleCode)) end
+-- hc.put_to_log(tostring(fragment))
 	if quotified then
 		fragment = quotified .. _CM_UNQOUTIFY(fragment, quotified) .. quotified
 		if replacement then replacement = quotified .. _CM_UNQOUTIFY(replacement, quotified) .. quotified end
@@ -143,24 +145,28 @@ function _CM_TO_LOG(fragment, replacement, RuleCode, IsException, RuleType, quot
 		table.insert(_CM_CURRENT_REQUEST_DATA.LogFragment2, { Filter = fragment })
 		return
 	end
+	local t = {}
 	local fnum, rule, strnum = RuleCode:match('^(%d+)(%D+)(%d+)')
-	fnum, strnum = tonumber(fnum), tonumber(strnum)
-	local ParserFilter = _CM_FILTER_CODES[rule]
-	local t = {
-		UserName = _CM_USER.Name,
-		IsException = IsException,
-		Parser = ParserFilter:match('^[^:]+'),
-		Filter = ParserFilter:match(':%s*(.*)'),
-		FileNumber = fnum,
-		StrNumber = strnum,
-		RuleText = hc.get_global_table_item('CM_ORIGINAL_RULES', ParserFilter:match('^[^:]+'))[fnum][strnum],
-		RuleType = RuleType,
-	}
+	if fnum then
+		fnum, strnum = tonumber(fnum), tonumber(strnum)
+		local ParserFilter = _CM_FILTER_CODES[rule]
+		t = {
+			UserName = _CM_USER.Name,
+			IsException = IsException,
+			Parser = ParserFilter:match('^[^:]+'),
+			Filter = ParserFilter:match(':%s*(.*)'),
+			FileNumber = fnum,
+			StrNumber = strnum,
+			RuleText = hc.get_global_table_item('CM_ORIGINAL_RULES', ParserFilter:match('^[^:]+'))[fnum][strnum],
+			RuleType = RuleType,
+		}
+	end
 	if fragment then
 		if _CM_CURRENT_REQUEST_DATA.Charset~='utf-8' then fragment = hc.recode(fragment, _CM_CODINGS[_CM_CURRENT_REQUEST_DATA.Charset], _CM_CODINGS['utf-8']) end
 		if IsException then t.Fragment = fragment
 		else
 			if replacement then
+				if not fnum then t.Filter = RuleCode end
 				t.Fragment = fragment
 				t.Replacement = replacement
 			else t.Fragment = fragment
@@ -191,14 +197,9 @@ function _CM_GET_FILTER_FILE_PATH_FROM_URL(url, sources)
 	if parser then
 		return _CM_DIR .. 'rules\\local\\' .. parser .. '\\' .. fname
 	else
-		fname = url:match('^https?://local%.cm/hcrules/(.*)')
-		if fname then
-			return hc.ini_path .. fname
-		else
-			local source = _CM_FIND_SOURCE_BY_URL(url, sources)
-			if source then
-				return _CM_DIR .. 'rules\\remote\\' .. source.Parser .. '\\' .. url:match('.*/(.*)')
-			end
+		local source = _CM_FIND_SOURCE_BY_URL(url, sources)
+		if source then
+			return _CM_DIR .. 'rules\\remote\\' .. source.Parser .. '\\' .. url:match('.*/(.*)')
 		end
 	end
 end
@@ -209,10 +210,13 @@ function _CM_UPDATE_CORE()
 	while hc.get_global('CM_UPDATE_COUNTER')>0 do	-- ждем пока закончитс€ обновление файла
 		hc.sleep(200)
 	end
-	_CM_OPTIONS = hc.get_global('CM_OPTIONS')
-	local lng = _CM_PREPARE_LANGUAGE(_CM_OPTIONS.LanguageID, true)	-- создаем переводчик с англ. €зыка на текущий €зык Ќ—
-	hc.put_msg('Content Master:\r\n' .. lng['Extension was updated'])
-	hc.play_sound('SystemExclamation')
+	_CM_USERS = _CM_USERS or loadstring(hc.get_global('CM_USERS'))()
+	if _CM_USERS.ALL.EnablePopupsAndSound then
+		_CM_OPTIONS = hc.get_global('CM_OPTIONS')
+		local lng = _CM_PREPARE_LANGUAGE(_CM_OPTIONS.LanguageID, true)	-- создаем переводчик с англ. €зыка на текущий €зык Ќ—
+		hc.put_msg('Content Master:\r\n' .. lng['Extension was updated'])
+		hc.play_sound('SystemExclamation')
+	end
 end
 
 function _CM_UPDATE_FILTERS()
@@ -406,8 +410,55 @@ function _CM_BRACKETS_IF_TOPLEVEL_ALTS(r)
 end
 
 
--- отсекает в ”–Ћ префиксы, добавл€емые WebWarper и OperaTurbo, преобразует из punycode в национальные символы
+function _CM_ENCODE_FUNCTION(f)
+	return hc.encode_base64(string.dump(f))
+end
+
+
+function _CM_DECODE_FUNCTION(f)
+	return loadstring(hc.decode_base64(f))
+end
+
+
+-- отсекает в ”–Ћ префиксы, добавл€емые WebWarper и OperaTurbo, преобразует из punycode в национальные символы, деобфусцирует
 function _CM_NORMALIZE_URL(url)
+
+
+	-- ============================== –ј— –џ“»≈ URL, —ѕ–я“јЌЌџ’ «ј —≈–¬»—ќћ-—ќ –јўј“≈Ћ≈ћ ——џЋќ  (»Ћ» »Ќџћ –≈ƒ»–≈ “ќћ) ==============================
+	local redirected
+	while true do	-- насто€щий URL может быть скрыт сокращателем (редиректором) или их цепочкой
+		local t, err, mark = re.find(url, _CM_OPTIONS.ShortenersRegexp)
+		if not t then break end
+		local cache_indx = 'shorten' .. _CM_GET_COMPLEX_USER_NAME(_CM_USER) .. url
+		local entry = hc.get_global_table_item('CM_URL_CACHE', cache_indx)
+		if not entry then
+			local fcontent = _CM_READ_FILE(hc.cache_path .. hc.prepare_url(url) .. '#m', false)
+			if #fcontent > 0 then
+				entry = fcontent:match('[lL]ocation:[^%S\r\n]*([^\r\n]+)')
+			end
+			if not entry then
+				entry = loadstring(hc.get_global_table_item('CM_RULES_ADDITIONS', mark))(url)
+				if not entry then break end
+			end
+		end
+		redirected = true
+		url = entry
+	end
+	-- ==============================  ќЌ≈÷ –ј— –џ“»я URL, —ѕ–я“јЌЌџ’ «ј —≈–¬»—ќћ-—ќ –јўј“≈Ћ≈ћ ——џЋќ  ==============================
+
+
+	-- ============================== ƒ≈ќЅ‘”— ј÷»я URL ==============================
+	if url:match('aHR0c') then
+		url = url:
+			gsub('^.-%?url=(aHR0c[%w=]*).*', function(s) return hc.decode_base64(s) end, 1):	-- попытка обобщени€ двух последующих правил
+			-- gsub('/ref%?url=(aHR0c[%w=]*)', function(s) return hc.decode_base64(s) end, 1):	-- пока только gismeteo.ru: https://www.gismeteo.ru/ref?url=aHR0cDovL2FkLmFkcml2ZXIucnUvY2dpLWJpbi9jbGljay5jZ2k/c2lkPTEmYWQ9NTMyNjI0JmJ0PTIxJnBpZD0yMDU3NzYzJmJpZD0zOTUwMDY1JmJuPTM5NTAwNjUmcm5kPTEzMjc5NzY2Mw==
+			gsub('^.-/go%.php%?%w+=(aHR0c[%w=]*).*', function(s) return hc.decode_base64(s) end, 1):	-- https://www.watchfree.to/go.php?gtfo=<base64_coded_url>
+			gsub('^.-/cgi%-bin/goto%.cgi%?q=(aHR0c[%w=]*).*',  function(s) return hc.decode_base64(s) end, 1):	-- http://movpod.in/cgi-bin/goto.cgi?q=<base64_coded_url>
+			gsub('^.-/engine/dude/index/leech_out%.php%?[ai][%:]3?[aA]?(aHR0c[%w=]*).*', function(s) s = s:gsub('%%3[dD]', '=') return hc.decode_base64(s) end, 1):	-- dude Smart Leech - модуль дл€ движка сайтов dle. Ќ-р, http://nemo-crack.org/engine/dude/index/leech_out.php?a%3AaHR0cDovL2hvdC1nYW1lLmluZm8v
+			gsub('^https://secure%.link/(aHR0c[%w=]*).*',  function(s) return hc.decode_base64(s) end, 1)	-- этот eyrn должен оставаться последним из-за двойного кодирования. Н-р некоторые https://www.watchfree.to/go.php?gtfo=<base64_coded_url> раскодируются в https://secure.link/<base64_coded_url>
+	end
+	-- ==============================  ќЌ≈÷ ƒ≈ќЅ‘”— ј÷»» URL ==============================
+
 	url = url:
 		gsub('^SOCKS5: Connect to (.*):443$', 'https://%1'):
 		gsub('^SOCKS5: Connect to (.*)', 'http://%1'):
@@ -415,74 +466,11 @@ function _CM_NORMALIZE_URL(url)
 		gsub('^http://www%.webwarper%.net/ww/([^~])', 'http://%1', 1):				-- Web Warper
 		gsub('^http://www%.webwarper%.net/ww/~clientscriptgz/', 'http://', 1):		-- Web Warper
 		gsub('%%3A', ':'):gsub('%%2F', '/'):gsub('%%2E', '.'):gsub('%%3F', '?'):gsub('%%3D', '='):gsub('%%26', '&'):
-		gsub('([/.])xn%-%-([%a%d-]+)', function(s1, s2) return s1 .. hc.recode(s2, _CM_OPTIONS.SystemCoding+200000, _CM_OPTIONS.SystemCoding) end):	-- Punycode
-
-		-- ============================== ƒ≈ќЅ‘”— ј÷»я URL ==============================
-		gsub('^https?://[^/]+/engine/go%.php%?url=(.*)', function(s) return hc.decode_base64(s) end):	-- движок сайтов dle: http://my-site.ru/engine/go.php?url=<base64_coded_url>
-		gsub('^.-/cgi%-bin/goto%.cgi%?q=(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w+=?=?)$',  function(s) return hc.decode_base64(s) end)	-- н-р, http://movpod.in/cgi-bin/goto.cgi?q=aHR0cDovL2hsb2sucWVydGV3cnQuY29tL29mZmVyP3Byb2Q9MTM5JnJlZj01MDQxMDE3
+		gsub('([/.])xn%-%-([%a%d-]+)', function(s1, s2) return s1 .. hc.recode(s2, _CM_OPTIONS.SystemCoding+200000, _CM_CODINGS['utf-8']) end)	-- Punycode
 		
-	return url,	((url:match('^https?://[^:/?]*') or '') .. '/'), (url:match('^https?://([^:/?]*)') or '')	-- возвращаем также им€ хоста и домена
+	return url,	((url:match('^https?://[^:/?]*') or '') .. '/'), (url:match('^https?://([^:/?]*)') or ''), redirected	-- возвращаем также им€ хоста и домена и признак редиректа
 end
 
-
-function _CM_RECALC_HITS(user)
-	if user[1] then
-		for i,childUser in ipairs(user) do
-			_CM_RECALC_HITS(childUser)
-		end
-		for parserName,parser in pairs(user.Parsers) do
-			parser.Hits = 0
-			for i,childUser in ipairs(user) do
-				parser.Hits = parser.Hits + (childUser.Parsers[parserName].Hits or 0)
-			end
-			for filterName,filter in pairs(parser.Filters) do
-				filter.Hits = 0
-				for i,childUser in ipairs(user) do
-					filter.Hits = filter.Hits + (childUser.Parsers[parserName].Filters[filterName].Hits or 0)
-				end
-			end
-		end
-	else
-		for _,parser in pairs(user.Parsers) do
-			parser.Hits = 0
-			for _,filter in pairs(parser.Filters) do
-				parser.Hits = parser.Hits + (filter.Hits or 0)
-			end
-		end
-	end
-end
-
-function _CM_UPDATE_HITS()
-	local rules = hc.get_global('CM_HITS')
-	local users = loadstring(hc.get_global('CM_USERS'))()
-	local amf = {}
-	for k,v in pairs(_CM_FILTER_CODES) do
-		amf[v] = k
-	end
-
-	for userName,user in pairs(users) do
-		if not user[1] then
-			for parserName,parser in pairs(user.Parsers) do
-				for filterName,filter in pairs(parser.Filters) do
-					local code1 = amf[parserName .. ': ' .. filterName]
-					filter.Hits = 0
-					for hash,hits_table in pairs(rules) do
-						local rule_source = hc.get_global_table_item('CM_RULES_SOURCE', hash)
-						if rule_source then
-							local FileNumber, code, StrNumber = rule_source:match('^(%d+)(%D+)(%d+)')
-							if code==code1 and hits_table[userName] then
--- hc.put_to_log(userName, '( ', code, ' ) = ', tostring(hits_table[userName]))
-								filter.Hits = filter.Hits + hits_table[userName]
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-	-- hc.set_global('CM_USERS', _CM_SAVE_TABLE(users))
-	return users
-end
 
 function _CM_HASH(...)
 	local crc, t, bracket = hc.crc32(table.concat({...})), {}, string.byte(')')
@@ -494,6 +482,7 @@ function _CM_HASH(...)
 	end
 	return string.char(unpack(t))
 end
+
 
 function _CM_GET_RULE_HASH(rule, extra)
 	local tmp_table, rule_uniquator = {}, {}
@@ -517,14 +506,14 @@ function _CM_PREPARE_ORIGINAL_RULES(Users, sources)
 		local json = require('dkjson')
 		package.path = old_path
 
-		local function parser_on(user, parser_name)
-			if user.Parsers[parser_name].On then return true end
+		local function parser_on(user, parser_name, slf)
+			if not slf and user.Parsers[parser_name].On then return true end
 			for _,child_user in ipairs(user) do
 				if parser_on(child_user, parser_name) then return true end
 			end
 		end
-		local function file_on(user, parser_name, file_number)
-			if user.Parsers[parser_name].Files[file_number].On then return true end
+		local function file_on(user, parser_name, file_number, slf)
+			if not slf and user.Parsers[parser_name].Files[file_number].On then return true end
 			for _,child_user in ipairs(user) do
 				if file_on(child_user, parser_name, file_number) then return true end
 			end
@@ -532,10 +521,10 @@ function _CM_PREPARE_ORIGINAL_RULES(Users, sources)
 		
 		local logs = {}
 		for ParserName,Parser in pairs(Users.ALL.Parsers) do
-			if parser_on(Users.ALL, ParserName) then
-				logs[ParserName] = {}
+			if parser_on(Users.ALL, ParserName, true) then
+			logs[ParserName] = {}
 				for FileNumber,File in ipairs(Parser.Files) do
-					if file_on(Users.ALL, ParserName, FileNumber) then
+					if file_on(Users.ALL, ParserName, FileNumber, true) then
 						local f, err = _CM_READ_FILE(_CM_GET_FILTER_FILE_PATH_FROM_URL(File.URL, sources), false)
 						if f then
 							logs[ParserName][FileNumber] = {}
@@ -544,10 +533,10 @@ function _CM_PREPARE_ORIGINAL_RULES(Users, sources)
 									logs[ParserName][FileNumber][ruleNumber] = rule.Find
 								end
 							else
-								local StrNumber = ParserName=='HandyCache' and -1 or 0
+								local StrNumber = 0
 								for str in f:gmatch('[^%S\r\n]*([^\r\n]*)\r?\n?') do
 									StrNumber = StrNumber + 1
-									logs[ParserName][FileNumber][StrNumber] = (ParserName=='HandyCache' and str:match('^.-#~#(.*)#~#.*') or str:match('^%s*(.*)'))
+									logs[ParserName][FileNumber][StrNumber] = str:match('^%s*(.*)')
 								end
 							end
 						else hc.put_to_log('Content Master - _CM_PREPARE_ORIGINAL_RULES:\r\n', err)
@@ -891,3 +880,5 @@ function _CM_SAVE_TABLE(...)
       return table_concat(rez)
     end
 end
+
+return true

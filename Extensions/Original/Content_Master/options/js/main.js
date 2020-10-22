@@ -1,4 +1,5 @@
-angular.module('CMOptionsApp', ['ui.bootstrap', 'pascalprecht.translate', 'once', 'ngAnimate', 'angular.filter', 'ngDragDrop'])
+
+angular.module('CMOptionsApp', ['pascalprecht.translate', 'once', 'ngAnimate', 'angular.filter', 'ngDragDrop', 'ui.bootstrap'])
 
 .config(['$translateProvider',
 	function ($translateProvider) {
@@ -10,8 +11,8 @@ angular.module('CMOptionsApp', ['ui.bootstrap', 'pascalprecht.translate', 'once'
 	}
 ])
 
-.controller('MainController', ['$scope', '$http', '$rootScope', '$translate',
-	function ($scope, $http, $rootScope, $translate) {
+.controller('MainController', ['$translate', '$rootScope', '$scope', '$http',
+	function ($translate, $rootScope, $scope, $http) {
 		
 		$rootScope.gotoPage = function (page, arg) {
 			$rootScope.selectedPage = page;

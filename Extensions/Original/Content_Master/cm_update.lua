@@ -1,19 +1,22 @@
 
 if hc.event=='RequestHeaderReceived' then
+-- hc.put_to_log(hc.url, '\r\n**RequestHeaderReceived = ', hc.request_header)
 	hc.read_from_cache_on = false
 	hc.white_mask = 'WBSDORU'
 	
-	if hc.method=='CONNECT' then return end
+	if hc.method=='CONNECT' then
+		hc.call_me_for('BeforeAnswerHeaderSend')
+		return
+	end
 	
 	local req_url, header = hc.url, hc.request_header
 	if header:match('CM%-Info:%s*UpdateCM') then
-		_CM_UPDATE_3 = 1
+		_CM_UPDATE_3 = 1	-- признак того, что это запрос на обновление ядра СМ (update_package.gz)
 		hc.call_me_for('AnswerHeaderReceived')
 	else
 		local path = _CM_DIR .. req_url:sub(#_CM_FOLDER_URL + 1):gsub('/', '\\')
 		hc.request_header = header:gsub('\r\n$', 'If-Modified-Since: ' .. hc.systime_to_str(hc.file_last_modified_time(path) or 0) .. '\r\n\r\n', 1)
 		-- hc.request_header = re.replace(header, [[(*ANYCRLF)^Host:\s*+\K.*?$]], req_url:match('^https?://(.-)[/%?]'))
-
 		hc.call_me_for('BeforeAnswerHeaderSend')
 	end
 elseif hc.event=='AnswerHeaderReceived' then
@@ -23,7 +26,7 @@ elseif hc.event=='AnswerHeaderReceived' then
 		hc.call_me_for('BeforeAnswerBodySend')
 	end
 elseif hc.event=='BeforeAnswerHeaderSend' then
--- hc.put_to_log(hc.url, '\r\n', hc.answer_header)
+-- hc.put_to_log(hc.url, '\r\n**BeforeAnswerHeaderSend = ', hc.answer_header)
 	if not hc.answer_header:match('^%S+%s*200%s') then
 		hc.set_global('CM_UPDATE_COUNTER', hc.get_global('CM_UPDATE_COUNTER') - 1)
 		return
@@ -35,11 +38,23 @@ elseif hc.event=='BeforeAnswerBodySend' then
 	if hc.last_part then
 		loadstring(hc.get_global('CM_COMMON'))()	-- подгружаем библиотеку общих функций
 		if _CM_UPDATE_3 then
+			local opts = hc.get_global('CM_OPTIONS')
+			lng = lng or _CM_PREPARE_LANGUAGE(opts.LanguageID, true)	-- создаем переводчик с англ. языка на текущий язык НС
+		
+			local Server_CM_Version = _CM_BODY:match('[\r\n]%s*@version%s*(%S+)')
+			local Local_CM_Version = opts.Version
+			if Local_CM_Version >= Server_CM_Version then	-- если на сервере более старая версия СМ, то обновление не требуется
+				hc.put_msg('Content Master\r\n', lng["Is up to date"])
+				hc.set_global('CM_UPDATE_COUNTER', hc.get_global('CM_UPDATE_COUNTER') - 1)
+				return
+			end
+
 			local Min_HC_Version = _CM_BODY:match('[\r\n]%s*@min_HC_version%s*(%S+)') or '0.0.0'
 			local HC_Version = hc.version_number
 			if HC_Version < Min_HC_Version then	-- если обновление СМ требует более высокой версии НС
 				hc.put_msg('Content Master\r\n', lng["Can't update. Needed HandyCache version:"], ' ', Min_HC_Version)
 				hc.play_sound('SystemHand')
+				hc.set_global('CM_UPDATE_COUNTER', hc.get_global('CM_UPDATE_COUNTER') - 1)
 				return
 			end
 			

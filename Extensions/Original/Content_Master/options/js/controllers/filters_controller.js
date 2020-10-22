@@ -93,30 +93,6 @@ angular.module('CMOptionsApp').controller('filtersController', ['$scope', '$http
 			};
 		};
 		
-		var clearHits = function (obj) {
-			angular.forEach(obj, function (value, key) {
-				if (key == 'Hits') {
-					obj[key] = '0';
-					return;
-				};
-				if (angular.isArray(value) || angular.isObject(value)) {
-					clearHits(value);
-				};
-			});
-		};
-		$scope.clearHitsAndSave = function () {
-			clearHits($rootScope.users);
-			$http.get('cmd_ClearHits');
-		};
-		$rootScope.$watch(function () { return $rootScope.options.fromUsersALL.CountersAutoUpdatePeriod; }, function (newPeriod, oldPeriod) {
-			if (angular.isDefined($scope.AutoUpdateAction)) {
-				$interval.cancel($scope.AutoUpdateAction)
-			};
-			if (angular.isDefined(newPeriod) && newPeriod!='') {
-				$scope.AutoUpdateAction = $interval($scope.updateHits, newPeriod * 1000);
-			};
-		});
-		
 		$scope.editSourceFile = function (url) {
 			var source = $rootScope.getSourceByURL(url);
 			if (source.Parser == 'ContentMaster') {
@@ -130,28 +106,6 @@ angular.module('CMOptionsApp').controller('filtersController', ['$scope', '$http
 						console.info(status)
 					});
 			};
-		};
-
-		$scope.updateHits = function () {
-			return $http.get('load_common_options.json')
-			.success(function (data) {
-				angular.forEach($rootScope.users, function (user, userId) {
-					for (var u1=0; u1<data.Options.users.length; u1++) {
-						if (data.Options.users[u1].Name == user.Name) {
-							angular.forEach(user.Parsers, function (parser, parserName) {
-								parser.Hits = data.Options.users[u1].Parsers[parserName].Hits
-								angular.forEach(parser.Filters, function (filter, filterName) {
-									filter.Hits = data.Options.users[u1].Parsers[parserName].Filters[filterName].Hits
-								});
-							});
-							break;
-						};
-					};
-				});
-			})
-			.error(function (data, status) {
-				console.info(status)
-			});
 		};
 
 		$scope.isEditable = function (url) {

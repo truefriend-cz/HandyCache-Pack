@@ -4,24 +4,22 @@
 <div ng-controller="filtersController">
 
 	<form name="FilterUpForm" class="form-inline navbar navbar-default navbar-fixed-top subnavbar">
-		<div class="pull-left">
-			{{ 'Counters update period, sec' | translate}}:
-			<input type="text" name="autoupdate" class="form-control" style="max-width: 5rem; display: inline;" placeholder="" ng-pattern="/^\d+$/" ng-model="options.fromUsersALL.CountersAutoUpdatePeriod">
-		</div>
 
 		<!--  Кнопки -->
 		<div class="btn-group pull-right">
 			<button type="button" class="btn btn-default" ng-click="saveOptions()" translate>Save</button>
 		</div>
-		<span class="btn-group pull-right" dropdown>
+		<span class="btn-group pull-right">
 			<button type="button" class="btn btn-default" ng-click="update()">{{ 'Update CM and filters' | translate }}</button>
-			<button type="button" class="btn btn-default" dropdown-toggle>
-				<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu" role="menu">
-				<li ng-click="update('CM')" translate>Update CM</li>
-				<li ng-click="update('Sources')" translate>Update filters</li>
-			</ul>
+			<span class="btn-group" dropdown is-open="isUpdateMenuOpen" ng-mouseenter="isUpdateMenuOpen=true" ng-mouseleave="isUpdateMenuOpen=false">
+				<button type="button" class="btn btn-default" dropdown-toggle>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu pull-right" role="menu">
+					<li ng-click="update('CM')" translate>Update CM</li>
+					<li ng-click="update('Sources')" translate>Update filters</li>
+				</ul>
+			</span>
 		</span>
 	</form>
 
@@ -40,23 +38,17 @@
 			<!-- Список фильтров -->
 			<div class="PageBlock">
 				<div class="TableHead" id="FiltersTableHead">
-					<span class="Hits" style="margin-left: 0;" translate>Hits</span>
 					<span style="padding-right: 3em;">{{ 'Filters' | translate }}</span>
 				</div>
 				<div ng-repeat="(parserName, parser) in selectedUser.Parsers | orderByKey" class="Parser" ng-class="{SelectedParser:parser===selectedParser}" ng-click="selectParser(parser)">
-					<span class="Hits">{{parser.Hits}}</span>
 					<input type="checkbox" ng-model="parser.On">
 					{{::parserName}}
 					<div class="Filter" collapse="!parser.On" ng-click="selectParser(parser)">
 						<div ng-repeat="(filterName, filter) in parser.Filters | orderByKey">
-							<span class="Hits">{{filter.Hits}}</span>
 							<input type="checkbox" ng-model="filter.On">
 							{{::filterName | translate}}
 						</div>
 					</div>
-				</div>
-				<div>
-					<button type="button" class="btn btn-default pull-right" ng-click="clearHitsAndSave()" translate>Clear hits</button>
 				</div>
 			</div>
 			

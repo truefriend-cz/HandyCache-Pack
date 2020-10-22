@@ -48,6 +48,10 @@
 				<input type="text" class="form-control" ng-model="options.fromUsersALL.Editor" ng-disabled="!isLocalUser" size="60">
 				<button type="button" class="btn btn-default" ng-click="selectEditor()" translate>Select file</button>
 			</div>
+
+			<div class="form-group">
+				<label style="padding: 0 5px;"><input type="checkbox" ng-model="options.fromUsersALL.EnablePopupsAndSound">{{ 'Enable popup and sound notifications' | translate }}</label><br>
+			</div>
 			
 			<div class="form-group">
 				{{ 'New password' | translate }}

@@ -6,9 +6,11 @@ package.path = old_path
 
 hc.put_to_log('Content Master destroy started...')
 
-local users = _CM_UPDATE_HITS()
-local unow = hc.get_global('CM_AUTO_UPDATE')
-users.ALL.AutoUpdate.last = unow.last
+local users = loadstring(hc.get_global('CM_USERS'))()
+
+users.ALL.AutoUpdate = hc.get_global('CM_AUTO_UPDATE')
+users.ALL.StatUpdatePeriod = hc.get_global('CM_AUTO_STAT')
+
 _CM_WRITE_FILE(hc.script_name:match('.*%.') .. 'ini', 'wb', _CM_SAVE_TABLE(users))
 
 -- освобождаем пам€ть глобальных переменных
@@ -47,6 +49,7 @@ hc.remove_global('CM_OPTIONS')	-- некоторые настройки СМ:
 hc.remove_global('CM_USERS')	-- список пользователей с прив€зкой к каждому включенных дл€ него групп фильтров, фильтров, файлов подписок
 hc.remove_global('CM_URL_CACHE')	-- кэш срабатывани€ фильтров по URL
 hc.remove_global('CM_AUTO_UPDATE')
+hc.remove_global('CM_AUTO_STAT')
 hc.remove_global('CM_DOMS')	-- DOM страниц, загруженных при включенном интерактивном режиме (Ќјƒќ Ѕџ Ё‘‘≈ “»¬Ќќ ќ„»ўј“№!!!)
 hc.remove_global('CM_COMMON')	-- библиотека общих функций
 hc.remove_global('CM_LANGUAGES')

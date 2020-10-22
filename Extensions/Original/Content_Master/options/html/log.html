@@ -44,7 +44,8 @@
 						<pre once-text="hit.Fragment"></pre>
 					</span>
 					<span once-if="!!hit.Replacement">
-						<p class="replacement" once-text="('Replaced by' | translate)+':'"></p>
+						<p once-if="!!hit.Fragment" class="replacement" once-text="('Replaced by' | translate)+':'"></p>
+						<p once-if="!hit.Fragment" class="replacement" once-text="('Fragment inserted' | translate)+':'"></p>
 						<pre once-text="hit.Replacement"></pre>
 					</span>
 				</div>

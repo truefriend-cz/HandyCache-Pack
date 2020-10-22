@@ -9,15 +9,14 @@
 	"Logout": "Выход",
 	"Help": "Помощь",
 	"This page is automatically created by Content Master extension v.": "Эта страница создана автоматически расширением Content Master версии ",
+	"Version history (Russian)": "История версий",
 	"E-mail to author": "Написать автору",
 	
 	"Filters": "Фильтры",
 	"User": "Пользователь",
 	"Users": "Пользователи",
-	"Hits": "Число срабатываний",
 	"Files": "Файлы",
 	"Save": "Сохранить",
-	"Clear hits": "Очистить число срабатываний",
 	"Add file": "Добавить файл",
 	"Update CM and filters": "Обновить CM и фильтры",
 	"Update CM": "Обновить CM",
@@ -56,10 +55,9 @@
 	"Autoupdate period, hours": "Интервал автоматического обновления, ч",
 	"Update CM core only": "Обновлять только ядро СМ",
 	"Edit filters in": "Редактировать фильтры в",
+	"Enable popup and sound notifications": "Разрешить оповещение всплывающими окнами и звуком",
 	"Select file": "Выбрать файл",
 	"New password": "Новый пароль для входа в настройки СМ",
-	
-	"Counters update period, sec": "Период обновления счетчиков, с",
 	
 	"Element hiding": "Скрытие элементов",
 	"Remove elements by URL": "Удаление элементов с URL",
@@ -90,6 +88,7 @@
 	
 	"Fragment": "Фрагмент",
 	"Fragment removed": "Удален фрагмент",
+	"Fragment inserted": "Вставлен фрагмент",
 	"Replaced by": "Заменен на",
 	
 	"Rule": "Правило",
@@ -97,6 +96,7 @@
 	"Replacement": "Замена",
 	"Length": "Длина",
 	"Tags": "Метки",
+	"Show all": "Показать все",
 	"Add tag": "Добавить метку",
 	"Create rule": "Создать правило",
 	"Save all files": "Сохранить все файлы",

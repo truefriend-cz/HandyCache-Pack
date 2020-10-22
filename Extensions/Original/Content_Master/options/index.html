@@ -11,9 +11,9 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">	
 	
 	<script src="./lib/angular.min.js"></script>
-	<script src="./lib/angular-animate.min.js"></script>
 	<script src="./lib/angular-translate.min.js"></script>
-	<script src="./lib/angular-translate-loader-static-files.js"></script>
+	<script src="./lib/angular-translate-loader-static-files.min.js"></script>
+	<script src="./lib/angular-animate.min.js"></script>
 	<script src="./lib/ui-bootstrap-tpls.min.js"></script>
 	<script src="./lib/once.js"></script>
 	<script src="./lib/draganddrop.js"></script>
@@ -29,8 +29,7 @@
 	<script src="./js/filters/order-by-key.js"></script>
 	<script src="./js/directives/cm-on-change.js"></script>
 </head>
-<body ng-controller="MainController">
-
+<body uiBroadcastTranslate ng-controller="MainController">
 	<div class="navbar navbar-default navbar-fixed-top">
 		<span class="btn-group" dropdown ng-if="isAuthenticated" is-open="isMainMenuOpen" style="z-index: 1040;" ng-mouseenter="isMainMenuOpen=true" ng-mouseleave="isMainMenuOpen=false">
 			<button type="button" class="btn btn-default" dropdown-toggle>
@@ -58,7 +57,8 @@
 
 
 	<div id="Footer">
-		<span translate>This page is automatically created by Content Master extension v.</span> {{options.Version}}
+		<span>{{ 'This page is automatically created by Content Master extension v.' | translate }}</span>
+		<a href="http://handycache.ru/cm/cm2/CM_Whats_new.txt" target="_blank" tooltip="{{ 'Version history (Russian)' | translate }}">{{options.Version}}</a>
 		<span style="float:right;"><a href="http://handycache.ru/cm/cm2/doc/ContentMaster.html" target="_blank" translate>Help</a> | <a href="mailto:nadenj@mail.ru" translate>E-mail to author</a></span>
 	</div>
 

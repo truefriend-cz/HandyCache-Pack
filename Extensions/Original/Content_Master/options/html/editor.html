@@ -150,14 +150,13 @@
 			<div style="background-color: #E6E0F0; margin-top: 1em;">
 				{{ editorOptions.fullTypes[ruleType] | translate }}
 			</div>
-			<div ng-repeat="filt in rule" ng-init="filterIsCollapsed = true" class="SourceInfoHeader" ui-on-drop="addNewTag($data, filt)">
+			<div ng-repeat="filt in rule" ng-init="filterIsCollapsed = true" class="SourceInfoHeader" ui-on-drop="addNewTag($data, filt)" once-style="editorOptions.now-editorOptions.hits[filt.Hash]>3600*24*120 && {'background-color':'#FFE5E5'}">
 				<input class="ShowOnHover pull-left" type="checkbox" ng-checked="::!filt.Off" cm-on-change>
 				<span ng-click="filterIsCollapsed = !filterIsCollapsed" once-class="{RuleOff: filt.Off, RuleIsException: !filt.Off && filt.IsException}" style="margin-left: 1rem;">
 					<span style="display:inline-block; width:90%; word-break:break-all;">
 						{{filt.Find}}
 						<small once-if="!!filt.ThirdParty" class="badge" style="margin: 0 1rem 0 3rem;">{{ 'Only for third-party domains' | translate }}</small>
 					</span>
-					{{::getSummHits(editorOptions.hits, filt)}}
 				</span>
 				<span class="glyphicon glyphicon-remove DeleteSign pull-right" ng-click="removeRule(filt)" once-if="isFileLocal(filt.File)"></span>
 				<div ng-if="!filterIsCollapsed" class="slide" style="padding: 0 1em 0 3em; background-color: #EEEEEE;">

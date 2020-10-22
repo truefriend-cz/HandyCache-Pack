@@ -75,7 +75,8 @@ angular.module('CMOptionsApp').controller('editorController', ['$scope', '$http'
 						},
 						
 						"files": data.files,
-						"hits": data.hits
+						"hits": data.hits,
+						"now": data.now
 					};
 					
 					$scope.editorOptions.selectedFile = $rootScope.pages.editor.targetFile;	// текущий выбранный файл
@@ -222,16 +223,6 @@ angular.module('CMOptionsApp').controller('editorController', ['$scope', '$http'
 				var e = -1;
 				angular.forEach(obj, function (prop, propName) { e++; });
 				return e;
-			};
-
-			$scope.getSummHits = function(hash_table, rule) {
-				if (!rule.Hash) { return ''; };
-				var t = hash_table[rule.Hash];
-				var sum = 0;
-				angular.forEach(t, function (hits, user) {
-					sum = sum + hits;
-				});
-				return sum==0 ? '' : sum;
 			};
 
 			$scope.getData().success(function () {
